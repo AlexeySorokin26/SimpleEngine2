@@ -2,11 +2,19 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 set(PROJECT_NAME SimpleEngineCore)
 
+set(ENGINE_PUBLIC_INCLUDES
+	includes/SimpleEngineCore/Application.h	
+)
+
+set(ENGINE_PUBLIC_SOURCES
+	src/SimpleEngineCore/Application.cpp
+)
+
 add_library(
 	${PROJECT_NAME} 
 	STATIC
-	src/SimpleEngineCore/Utils/test.cpp
-	includes/SimpleEngineCore/Utils/test.h
+	${ENGINE_PUBLIC_INCLUDES} 
+	${ENGINE_PUBLIC_SOURCES} 
 )
 
 target_include_directories(
