@@ -20,3 +20,8 @@ target_compile_features(
 	PUBLIC
 	cxx_std_17
 )
+
+add_subdirectory(../external/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)
+# we add glfw with own cmake file 
+# and also specify where to put binaries of generated lib as 2 arg
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw) # add now link it to our core 

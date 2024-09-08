@@ -1,5 +1,6 @@
 #include <iostream>
+#include <SimpleEngineCore/Utils/test.h>
 
 int main() {
-	std::cout << "editor" << std::endl;
+	SimpleEngine::checkGLFW();
 }
