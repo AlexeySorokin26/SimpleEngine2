@@ -1,12 +1,13 @@
 #include "SimpleEngineCore/Application.h"
 #include <iostream>
 #include <GLFW/glfw3.h>
+#include "SimpleEngineCore/Log.h"
 
 namespace SimpleEngine {
 	Application::Application() {
-
+		LOG_INFO("Welcome");
 	}
-	
+
 	Application::~Application() {
 
 	}
@@ -47,7 +48,7 @@ namespace SimpleEngine {
 		glfwTerminate();
 		return 0;
 	}
-	
+
 	void Application::on_update() {
 
 	}

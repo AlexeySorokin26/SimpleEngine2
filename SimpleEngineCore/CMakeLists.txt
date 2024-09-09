@@ -4,10 +4,12 @@ set(PROJECT_NAME SimpleEngineCore)
 
 set(ENGINE_PUBLIC_INCLUDES
 	includes/SimpleEngineCore/Application.h	
+	includes/SimpleEngineCore/Log.h	
 )
 
 set(ENGINE_PUBLIC_SOURCES
 	src/SimpleEngineCore/Application.cpp
+	src/SimpleEngineCore/Log.cpp
 )
 
 add_library(
@@ -33,3 +35,6 @@ add_subdirectory(../external/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)
 # we add glfw with own cmake file 
 # and also specify where to put binaries of generated lib as 2 arg
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw) # add now link it to our core 
+
+add_subdirectory(../external/spdlog ${CMAKE_CURRENT_BINARY_DIR}/spdlog)
+target_link_libraries(${PROJECT_NAME} PRIVATE spdlog)
