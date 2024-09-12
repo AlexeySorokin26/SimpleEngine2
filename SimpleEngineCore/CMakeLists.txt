@@ -38,3 +38,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw) # add now link it to our cor
 
 add_subdirectory(../external/spdlog ${CMAKE_CURRENT_BINARY_DIR}/spdlog)
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog)
+
+add_subdirectory(../external/glad ${CMAKE_CURRENT_BINARY_DIR}/glad)
+target_link_libraries(${PROJECT_NAME} PRIVATE glad)
