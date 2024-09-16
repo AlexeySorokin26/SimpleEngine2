@@ -7,8 +7,13 @@ set(ENGINE_PUBLIC_INCLUDES
 	includes/SimpleEngineCore/Log.h	
 )
 
-set(ENGINE_PUBLIC_SOURCES
+set(ENGINE_PRIVATE_INCLUDES
+	src/SimpleEngineCore/Window.h
+)
+
+set(ENGINE_PRIVATE_SOURCES
 	src/SimpleEngineCore/Application.cpp
+	src/SimpleEngineCore/Window.cpp
 	src/SimpleEngineCore/Log.cpp
 )
 
@@ -16,13 +21,20 @@ add_library(
 	${PROJECT_NAME} 
 	STATIC
 	${ENGINE_PUBLIC_INCLUDES} 
-	${ENGINE_PUBLIC_SOURCES} 
+	${ENGINE_PRIVATE_INCLUDES} 
+	${ENGINE_PRIVATE_SOURCES} 
 )
 
 target_include_directories(
 	${PROJECT_NAME} 
 	PUBLIC
 	includes
+)
+
+target_include_directories(
+	${PROJECT_NAME} 
+	PRIVATE
+	src
 )
 
 target_compile_features(
