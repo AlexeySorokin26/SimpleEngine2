@@ -5,6 +5,7 @@ set(PROJECT_NAME SimpleEngineCore)
 set(ENGINE_PUBLIC_INCLUDES
 	includes/SimpleEngineCore/Application.h	
 	includes/SimpleEngineCore/Log.h	
+	includes/SimpleEngineCore/Event.h	
 )
 
 set(ENGINE_PRIVATE_INCLUDES
