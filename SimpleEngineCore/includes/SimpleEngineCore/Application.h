@@ -1,8 +1,8 @@
 #pragma once
 
+#include "SimpleEngineCore/Event.h"
+
 #include <memory>
-
-
 
 namespace SimpleEngine {
 
@@ -21,5 +21,8 @@ namespace SimpleEngine {
 
 	private:
 		std::unique_ptr<class Window> m_pWindow;
+
+		EventDispatcher m_event_dispatcher;
+		bool m_bCloseWindow = false;
 	};
 }

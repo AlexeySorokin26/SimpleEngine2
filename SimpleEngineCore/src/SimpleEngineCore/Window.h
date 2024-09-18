@@ -11,7 +11,7 @@ namespace SimpleEngine {
 
 	class Window {
 	public:
-		using EventCallbackFn = std::function<void(Event&)>;
+		using EventCallbackFn = std::function<void(BaseEvent&)>;
 
 		Window(std::string title, const unsigned int width, const unsigned int height);
 		~Window();
@@ -29,6 +29,7 @@ namespace SimpleEngine {
 		void set_event_callback(const EventCallbackFn& callback) {
 			m_data.eventCallbackFn = callback;
 		}
+
 	private:
 		struct WindowData {
 			std::string title;

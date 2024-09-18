@@ -28,7 +28,6 @@ namespace SimpleEngine {
 			s_GLFW_initialized = true;
 		}
 
-
 		/* Create a windowed mode window and its OpenGL context */
 		m_pWindow = glfwCreateWindow(m_data.width, m_data.height, m_data.title.c_str(), NULL, NULL);
 		if (!m_pWindow)
@@ -53,7 +52,7 @@ namespace SimpleEngine {
 		glfwSetWindowSizeCallback(m_pWindow,
 			[](GLFWwindow* pWindow, int width, int height)
 			{
-				LOG_INFO("New size {0}x{1}", width, height);
+				LOG_INFO("New window size {0}x{1}", width, height);
 
 				// get pointer to our data 
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(pWindow);
@@ -62,9 +61,23 @@ namespace SimpleEngine {
 				data.height = height;
 
 				// collect data for event
-				Event event;
-				event.widht = width;
-				event.height = height;
+				EventWindowResize event(width, height);
+
+				// actually call our own callback to handle event
+				data.eventCallbackFn(event);
+			}
+		);
+
+		glfwSetCursorPosCallback(m_pWindow,
+			[](GLFWwindow* pWindow, double x, double y)
+			{
+				LOG_INFO("New cursor pos {0}x{1}", x, y);
+
+				// get pointer to our data 
+				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(pWindow);
+
+				// collect data for event
+				EventMouseMoved event(x, y);
 
 				// actually call our own callback to handle event
 				data.eventCallbackFn(event);
@@ -73,7 +86,6 @@ namespace SimpleEngine {
 
 		return 0;
 	}
-
 
 	void Window::on_update() {
 		glClearColor(1, 1, 1, 0);
