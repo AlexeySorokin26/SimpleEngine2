@@ -27,19 +27,11 @@ namespace SimpleEngine {
 
 	class EventDispatcher {
 	public:
-		//void add_event_listener(std::function<void(BaseEvent&)> callback) {
-		//	auto baseCallback = [func = std::move(callback)](BaseEvent& e)
-		//		{
-		//			func(static_cast<TEventType&>(e));
-		//		};
-		//	m_eventCallbacks[static_cast<size_t>(TEventType::type)] = std::move(baseCallback);
-		//}
-
 		template<typename TEventType>
 		void add_event_listener(std::function<void(TEventType&)> callback) {
-			auto baseCallback = [func = std::move(callback)](BaseEvent& e)
+			auto baseCallback = [callback](BaseEvent& e)
 				{
-					func(static_cast<TEventType&>(e));
+					callback(static_cast<TEventType&>(e));
 				};
 			m_eventCallbacks[static_cast<size_t>(TEventType::type)] = std::move(baseCallback);
 		}
@@ -53,6 +45,13 @@ namespace SimpleEngine {
 		std::array<std::function<void(BaseEvent&)>, static_cast<size_t>(EventType::EventsCount)> m_eventCallbacks;
 	};
 
+	struct EventWindowClosed : public BaseEvent {
+		EventWindowClosed() {}
+		EventType get_type() const override {
+			return type;
+		}
+		static const EventType type = EventType::WindowClose;
+	};
 
 	struct EventMouseMoved : public BaseEvent {
 		EventMouseMoved(const double x, const double y) :

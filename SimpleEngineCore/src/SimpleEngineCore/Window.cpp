@@ -83,7 +83,16 @@ namespace SimpleEngine {
 				data.eventCallbackFn(event);
 			}
 		);
+		glfwSetWindowCloseCallback(m_pWindow, [](GLFWwindow* pWindow) {
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(pWindow);
 
+			// collect data for event
+			EventWindowClosed event;
+
+			// actually call our own callback to handle event
+			data.eventCallbackFn(event);
+			}
+		);
 		return 0;
 	}
 
