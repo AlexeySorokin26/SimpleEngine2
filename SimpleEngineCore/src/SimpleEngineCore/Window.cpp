@@ -1,6 +1,7 @@
 #include "SimpleEngineCore/Window.h"
 #include "SimpleEngineCore/Log.h"
 #include "SimpleEngineCore/Rendering/OpenGL/ShaderProgram.h"
+#include "SimpleEngineCore/Rendering/OpenGL/VertexBuffer.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -45,6 +46,9 @@ namespace SimpleEngine {
 		"}";
 
 	std::unique_ptr<ShaderProgram> p_shader_program;
+	std::unique_ptr<VertexBuffer> p_points_vbo;
+	std::unique_ptr<VertexBuffer> p_colors_vbo;
+
 	GLuint vao;
 
 	Window::Window(std::string title, const unsigned int width, const unsigned int height)
@@ -151,21 +155,10 @@ namespace SimpleEngine {
 		if (!p_shader_program->isCompiled())
 			return false;
 
-		// NOW we have to PASS our data in shaders 
+		// NOW we have to PASS our CPU data in shaders 
 		// using VERTEX BUFFER OBJECT to allocate and fill memory on gpu
-		GLuint points_vbo = 0;
-		// gen buffer and write its id in points_vbo adress
-		glGenBuffers(1, &points_vbo);
-		// connect buffer and make it current (only one can be current)
-		glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-		// fill buffer by transfering data from cpu to gpu memory
-		glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW); // static means data in buffer do not change
-
-		// the same for colors
-		GLuint colors_vbo = 0;
-		glGenBuffers(1, &colors_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+		p_points_vbo = std::make_unique<VertexBuffer>(points, sizeof(points));
+		p_colors_vbo = std::make_unique<VertexBuffer>(colors, sizeof(colors));
 
 		// NEXT we have to BIND data from buffers with our shaders 
 		// basicly tell gpu how to manage data 
@@ -176,13 +169,13 @@ namespace SimpleEngine {
 		// first we have to TURN ON position 
 		glEnableVertexAttribArray(0);
 		// again have to make our vbo for points first active since currently for colors is active
-		glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+		p_points_vbo->bind();
 		// finally link data: position, amount of data, type, norm, stride, shift
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 		// the same for colors
 		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
+		p_colors_vbo->bind();
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 		return 0;
