@@ -2,6 +2,7 @@
 #include "SimpleEngineCore/Log.h"
 #include "SimpleEngineCore/Rendering/OpenGL/ShaderProgram.h"
 #include "SimpleEngineCore/Rendering/OpenGL/VertexBuffer.h"
+#include "SimpleEngineCore/Rendering/OpenGL/VertexArray.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -48,8 +49,7 @@ namespace SimpleEngine {
 	std::unique_ptr<ShaderProgram> p_shader_program;
 	std::unique_ptr<VertexBuffer> p_points_vbo;
 	std::unique_ptr<VertexBuffer> p_colors_vbo;
-
-	GLuint vao;
+	std::unique_ptr<VertexArray> p_vao;
 
 	Window::Window(std::string title, const unsigned int width, const unsigned int height)
 		: m_data({ std::move(title), width, height }) {
@@ -160,23 +160,11 @@ namespace SimpleEngine {
 		p_points_vbo = std::make_unique<VertexBuffer>(points, sizeof(points));
 		p_colors_vbo = std::make_unique<VertexBuffer>(colors, sizeof(colors));
 
-		// NEXT we have to BIND data from buffers with our shaders 
-		// basicly tell gpu how to manage data 
-		// for that we are using VERTEX ARRAY OBJECT
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
-		// now bind our VBO with its position in vertex shaders 
-		// first we have to TURN ON position 
-		glEnableVertexAttribArray(0);
-		// again have to make our vbo for points first active since currently for colors is active
-		p_points_vbo->bind();
-		// finally link data: position, amount of data, type, norm, stride, shift
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-		// the same for colors
-		glEnableVertexAttribArray(1);
-		p_colors_vbo->bind();
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+		// NEXT BIND data from buffers with our shaders
+		// using VERTEX ARRAY OBJECT
+		p_vao = std::make_unique<VertexArray>();
+		p_vao->add_buffer(*p_points_vbo);
+		p_vao->add_buffer(*p_colors_vbo);
 
 		return 0;
 	}
@@ -189,7 +177,7 @@ namespace SimpleEngine {
 		// make it current
 		p_shader_program->bind();
 		// attach vao
-		glBindVertexArray(vao);
+		p_vao->bind();
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		// set window size where imgui should draw
