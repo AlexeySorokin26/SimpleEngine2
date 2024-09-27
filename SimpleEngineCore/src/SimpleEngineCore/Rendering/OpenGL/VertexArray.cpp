@@ -38,13 +38,22 @@ namespace SimpleEngine {
 		bind();
 		vertex_buffer.bind(); // vbo 
 
-		// first we have to TURN ON position (location)
-		glEnableVertexAttribArray(m_elements_count);
-		// finally link data enabled vbo with our enabled loation
-		// args: location, amount of data, type, norm, stride, shift
-		glVertexAttribPointer(m_elements_count, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+		for (const BufferElement& current_el : vertex_buffer.get_layout().get_elements()) {
+			// first we have to TURN ON position (location)
+			glEnableVertexAttribArray(m_elements_count);
+			// finally link data enabled vbo with our enabled loation
+			// args: location, amount of data, type, norm, stride, shift
+			glVertexAttribPointer(
+				m_elements_count,
+				static_cast<GLint>(current_el.components_count),
+				current_el.component_type,
+				GL_FALSE,
+				static_cast<GLsizei>(vertex_buffer.get_layout().get_stride()),
+				reinterpret_cast<const void*>(current_el.offset)
+			);
+			++m_elements_count;
+		}
 
-		++m_elements_count;
 	}
 
 	void SimpleEngine::VertexArray::bind() const

@@ -28,6 +28,12 @@ namespace SimpleEngine {
 		0.0f, 0.0f, 1.0f,
 	};
 
+	GLfloat pos_colors[] = {
+	0.0f, 0.5f, 0.0f,	1.0f, 0.0f, 0.0f,
+	0.5f, -0.5f, 0.0f,	0.5f, 1.0f, 0.0f,
+	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+	};
+
 	const char* vertex_shader =
 		"#version 460\n"
 		"layout(location=0) in vec3 vertex_position;" // location is a position where shader should search data like pos in function when we are passing data
@@ -49,7 +55,10 @@ namespace SimpleEngine {
 	std::unique_ptr<ShaderProgram> p_shader_program;
 	std::unique_ptr<VertexBuffer> p_points_vbo;
 	std::unique_ptr<VertexBuffer> p_colors_vbo;
-	std::unique_ptr<VertexArray> p_vao;
+	std::unique_ptr<VertexArray> p_vao_2buffers;
+
+	std::unique_ptr<VertexBuffer> p_pos_colors_vbo;
+	std::unique_ptr<VertexArray> p_vao_1buffer;
 
 	Window::Window(std::string title, const unsigned int width, const unsigned int height)
 		: m_data({ std::move(title), width, height }) {
@@ -155,16 +164,35 @@ namespace SimpleEngine {
 		if (!p_shader_program->isCompiled())
 			return false;
 
+		BufferLayout buffer_layout_1vec3{
+			ShaderDataType::Float3
+		};
+
 		// NOW we have to PASS our CPU data in shaders 
 		// using VERTEX BUFFER OBJECT to allocate and fill memory on gpu
-		p_points_vbo = std::make_unique<VertexBuffer>(points, sizeof(points));
-		p_colors_vbo = std::make_unique<VertexBuffer>(colors, sizeof(colors));
+		p_vao_2buffers = std::make_unique<VertexArray>();
+		p_points_vbo = std::make_unique<VertexBuffer>(points, sizeof(points), buffer_layout_1vec3);
+		p_colors_vbo = std::make_unique<VertexBuffer>(colors, sizeof(colors), buffer_layout_1vec3);
 
 		// NEXT BIND data from buffers with our shaders
 		// using VERTEX ARRAY OBJECT
-		p_vao = std::make_unique<VertexArray>();
-		p_vao->add_buffer(*p_points_vbo);
-		p_vao->add_buffer(*p_colors_vbo);
+		p_vao_2buffers->add_buffer(*p_points_vbo);
+		p_vao_2buffers->add_buffer(*p_colors_vbo);
+
+		BufferLayout buffer_layout_2vec3
+		{
+			ShaderDataType::Float3,
+			ShaderDataType::Float3
+		};
+
+		// NOW we have to PASS our CPU data in shaders 
+		// using VERTEX BUFFER OBJECT to allocate and fill memory on gpu
+		p_vao_1buffer = std::make_unique<VertexArray>();
+		p_pos_colors_vbo = std::make_unique<VertexBuffer>(pos_colors, sizeof(pos_colors), buffer_layout_2vec3);
+
+		// NEXT BIND data from buffers with our shaders
+		// using VERTEX ARRAY OBJECT
+		p_vao_1buffer->add_buffer(*p_pos_colors_vbo);
 
 		return 0;
 	}
@@ -177,7 +205,8 @@ namespace SimpleEngine {
 		// make it current
 		p_shader_program->bind();
 		// attach vao
-		p_vao->bind();
+		//p_vao_2buffers->bind();
+		p_vao_1buffer->bind();
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		// set window size where imgui should draw
