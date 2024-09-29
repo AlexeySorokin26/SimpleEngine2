@@ -6,7 +6,7 @@
 
 namespace SimpleEngine {
 
-	constexpr GLenum usage_to_GLenum(const VertexBuffer::EUsage usage) {
+	constexpr GLenum usage_to_GLenum1(const VertexBuffer::EUsage usage) {
 		switch (usage)
 		{
 			case VertexBuffer::EUsage::Static: return GL_STATIC_DRAW;
@@ -26,7 +26,7 @@ namespace SimpleEngine {
 			LOG_ERROR("Failed to generate an index buffer");
 		}
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(GLuint), data, usage_to_GLenum(usage));
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(GLuint), data, usage_to_GLenum1(usage));
 		GLenum error = glGetError();
 		if (error != GL_NO_ERROR) {
 			LOG_ERROR("OpenGL error occurred: {0}", error);

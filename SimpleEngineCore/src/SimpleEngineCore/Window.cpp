@@ -19,10 +19,10 @@ namespace SimpleEngine {
 	static bool s_GLFW_initialized = false;
 
 	GLfloat pos_colors[] = {
-		-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f, 0.0f,		0.5f, 1.0f, 0.0f,
-		-0.5f, 0.5f, 0.0f,		0.0f, 0.0f, 1.0f,
-		0.5f, 0.5f, 0.0f,		1.0f, 0.0f, 0.0f
+	   -0.5f, -0.5f, 0.0f,   1.0f, 1.0f, 0.0f,
+		0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 1.0f,
+	   -0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 1.0f,
+		0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f
 	};
 
 	GLuint indices[] = {
@@ -198,7 +198,8 @@ namespace SimpleEngine {
 
 		p_shader_program->bind();
 		p_vao->bind();
-		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(p_vao->get_indices_count()), GL_UNSIGNED_INT, nullptr);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, p_vao->get_indices_count(), GL_UNSIGNED_INT, nullptr);
 
 		ImGui::End();
 
