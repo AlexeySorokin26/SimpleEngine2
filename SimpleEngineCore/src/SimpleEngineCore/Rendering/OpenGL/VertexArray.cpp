@@ -3,26 +3,35 @@
 #include <glad/glad.h>
 
 namespace SimpleEngine {
-	SimpleEngine::VertexArray::VertexArray()
+	VertexArray::VertexArray()
 	{
 		glGenVertexArrays(1, &m_id);
 	}
 
-	SimpleEngine::VertexArray::~VertexArray()
+	VertexArray::~VertexArray()
 	{
-		glDeleteVertexArrays(1, &m_id);
+		if (m_id != 0) {
+			glDeleteVertexArrays(1, &m_id);
+		}
 	}
 
-	VertexArray& SimpleEngine::VertexArray::operator=(VertexArray&& vertex_array) noexcept
+	VertexArray& VertexArray::operator=(VertexArray&& vertex_array) noexcept
 	{
-		m_id = vertex_array.m_id;
-		m_elements_count = vertex_array.m_elements_count;
-		vertex_array.m_id = 0;
-		vertex_array.m_elements_count = 0;
+		if (this != &vertex_array) {
+			glDeleteVertexArrays(1, &m_id);  // Clean up the existing VAO
+
+			m_id = vertex_array.m_id;
+			m_elements_count = vertex_array.m_elements_count;
+			m_indices_count = vertex_array.m_indices_count;
+
+			vertex_array.m_id = 0;
+			vertex_array.m_elements_count = 0;
+			vertex_array.m_indices_count = 0;
+		}
 		return *this;
 	}
 
-	SimpleEngine::VertexArray::VertexArray(VertexArray&& vertex_array) noexcept :
+	VertexArray::VertexArray(VertexArray&& vertex_array) noexcept :
 		m_id(vertex_array.m_id), m_elements_count(vertex_array.m_elements_count)
 	{
 		vertex_array.m_id = 0;
@@ -32,7 +41,7 @@ namespace SimpleEngine {
 	// We have to BIND data from buffers with our shaders
 	// basicly tell gpu how to manage data 
 	// for that we are using VERTEX ARRAY OBJECT
-	void SimpleEngine::VertexArray::add_buffer(const VertexBuffer& vertex_buffer)
+	void VertexArray::add_vertex_buffer(const VertexBuffer& vertex_buffer)
 	{
 		// again have to make our vbo for points first active since currently for colors is active
 		bind();
@@ -53,15 +62,21 @@ namespace SimpleEngine {
 			);
 			++m_elements_count;
 		}
-
 	}
 
-	void SimpleEngine::VertexArray::bind() const
+	void VertexArray::set_index_buffer(const IndexBuffer& index_buffer) {
+		// again have to make our vbo for points first active since currently for colors is active
+		bind();
+		index_buffer.bind();
+		m_indices_count = index_buffer.get_count();
+	}
+
+	void VertexArray::bind() const
 	{
 		glBindVertexArray(m_id);
 	}
 
-	void SimpleEngine::VertexArray::unbind()
+	void VertexArray::unbind()
 	{
 		glBindVertexArray(0);
 	}
