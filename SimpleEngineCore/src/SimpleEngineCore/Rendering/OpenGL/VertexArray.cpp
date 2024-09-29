@@ -44,12 +44,12 @@ namespace SimpleEngine {
 			// finally link data enabled vbo with our enabled loation
 			// args: location, amount of data, type, norm, stride, shift
 			glVertexAttribPointer(
-				m_elements_count,
-				static_cast<GLint>(current_el.components_count),
-				current_el.component_type,
-				GL_FALSE,
-				static_cast<GLsizei>(vertex_buffer.get_layout().get_stride()),
-				reinterpret_cast<const void*>(current_el.offset)
+				m_elements_count, // location
+				static_cast<GLint>(current_el.components_count), // number of components in Float or FLOAT2
+				current_el.component_type, // Float or INT or ...
+				GL_FALSE, // do we have to normalize? 
+				static_cast<GLsizei>(vertex_buffer.get_layout().get_stride()), // stride 
+				reinterpret_cast<const void*>(current_el.offset) // shift 
 			);
 			++m_elements_count;
 		}

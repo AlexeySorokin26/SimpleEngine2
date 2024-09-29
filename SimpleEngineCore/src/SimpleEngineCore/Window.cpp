@@ -9,6 +9,7 @@
 
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
+#include <imgui/backends/imgui_impl_glfw.h>
 
 #include <memory>
 
@@ -17,8 +18,8 @@ namespace SimpleEngine {
 	static bool s_GLFW_initialized = false;
 
 	GLfloat points[] = {
-		0.0f, 0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
+		0.5f, 0.5f, 0.0f,
+		0.0f, -0.5f, 0.0f,
 		-0.5f, -0.5f, 0.0f,
 	};
 
@@ -52,6 +53,8 @@ namespace SimpleEngine {
 		"	frag_color = vec4(color, 1.0);"
 		"}";
 
+	float m_background_color[] = { 0, 0, 0, 1 };
+
 	std::unique_ptr<ShaderProgram> p_shader_program;
 	std::unique_ptr<VertexBuffer> p_points_vbo;
 	std::unique_ptr<VertexBuffer> p_colors_vbo;
@@ -68,6 +71,7 @@ namespace SimpleEngine {
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGui_ImplOpenGL3_Init();
+		ImGui_ImplGlfw_InitForOpenGL(m_pWindow, true);
 	}
 
 	Window::~Window() {
@@ -198,16 +202,12 @@ namespace SimpleEngine {
 	}
 
 	void Window::on_update() {
-		glClearColor(1, 1, 1, 0);
+		glClearColor(m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// attach shader we want to use it for every vertex and fragment
 		// make it current
-		p_shader_program->bind();
-		// attach vao
-		//p_vao_2buffers->bind();
-		p_vao_1buffer->bind();
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+
 
 		// set window size where imgui should draw
 		ImGuiIO& io = ImGui::GetIO();
@@ -216,9 +216,25 @@ namespace SimpleEngine {
 
 		// create frame for imgui
 		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::ShowDemoWindow();
+		ImGui::Begin("Background Color Window");
+		ImGui::ColorEdit4("Background Color", m_background_color);
+
+		static bool use_2_buffers = true;
+		ImGui::Checkbox("2 buffers", &use_2_buffers);
+		if (use_2_buffers) {
+			p_shader_program->bind();
+			p_vao_2buffers->bind();
+			glDrawArrays(GL_TRIANGLES, 0, 3);
+		}
+		else {
+			p_shader_program->bind();
+			p_vao_1buffer->bind();
+			glDrawArrays(GL_TRIANGLES, 0, 3);
+		}
+		ImGui::End();
 
 		// render it in imgui
 		ImGui::Render();

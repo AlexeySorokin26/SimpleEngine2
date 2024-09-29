@@ -4,7 +4,8 @@
 
 namespace SimpleEngine {
 
-	enum class ShaderDataType {
+	enum class ShaderDataType
+	{
 		Float,
 		Float2,
 		Float3,
@@ -15,16 +16,25 @@ namespace SimpleEngine {
 		Int4
 	};
 
-	struct BufferElement {
+	struct BufferElement
+	{
 		ShaderDataType type;
-		uint32_t component_type; // for opengl 
+		uint32_t component_type; // Float, FLoat2, FLoat3, ...
 		size_t components_count; // Float2 -> 2 components 
-		size_t size; // size in bytes 
-		size_t offset;
+		size_t size;			 // size in bytes 
+		size_t offset; 
+		// Смещение(в байтах) от начала массива до первой компоненты атрибута. 
+		// Это используется для указания, 
+		// где в массиве памяти начинаются данные для конкретного атрибута.
+		// how many bytes we have from beginning to our first component of our attribute
+		// for pos it will be 0 for cols 3 * 4 bytes 
+		// for old style offset and stride are 0
+
 		BufferElement(const ShaderDataType type);
 	};
 
-	class BufferLayout {
+	class BufferLayout
+	{
 	public:
 		BufferLayout(std::initializer_list<BufferElement> elements) :
 			m_elements(std::move(elements)) {
@@ -42,9 +52,14 @@ namespace SimpleEngine {
 	private:
 		std::vector<BufferElement> m_elements;
 		size_t m_stride = 0;
+		// in how many bytes we have next element
+		// in case of pos_cols its 3 pos and 3 col = 4 * 3 + 4 * 3
+		// so we have one for pos one for col and then the next one for pos and one for col
+		// for old style offset and stride are 0
 	};
 
-	class VertexBuffer {
+	class VertexBuffer
+	{
 	public:
 		enum class EUsage {
 			Static,

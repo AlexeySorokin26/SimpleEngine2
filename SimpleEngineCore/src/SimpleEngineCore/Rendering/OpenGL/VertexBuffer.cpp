@@ -110,8 +110,9 @@ namespace SimpleEngine {
 
 	BufferElement::BufferElement(const ShaderDataType type)
 		: type(type)
-		, component_type(shader_data_type_to_component_type(type))
+
 		, components_count(shader_data_type_to_components_count(type))
+		, component_type(shader_data_type_to_component_type(type))
 		, size(shader_data_type_size(type))
 		, offset(0)
 	{
