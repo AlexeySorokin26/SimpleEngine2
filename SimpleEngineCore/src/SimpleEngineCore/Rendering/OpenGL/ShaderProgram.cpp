@@ -5,6 +5,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include <string>
 
 namespace SimpleEngine {
@@ -57,7 +59,7 @@ namespace SimpleEngine {
 			m_id = 0;
 			glDeleteShader(vertex_shader_id);
 			glDeleteShader(frag_shader_id);
-			return; 
+			return;
 		}
 		else {
 			m_isCompiled = true;
@@ -104,5 +106,10 @@ namespace SimpleEngine {
 	void SimpleEngine::ShaderProgram::unbind()
 	{
 		glUseProgram(0); // means 0 shader 
+	}
+
+	void SimpleEngine::ShaderProgram::setMatrix4(const char* name, const glm::mat4& matrix) const {
+		// get location by name, amount of args, transponse or not, pointer to data specially for glm such way
+		glUniformMatrix4fv(glGetUniformLocation(m_id, name), 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 }
