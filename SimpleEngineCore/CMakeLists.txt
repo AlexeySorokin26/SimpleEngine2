@@ -71,6 +71,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE spdlog)
 add_subdirectory(../external/glad ${CMAKE_CURRENT_BINARY_DIR}/glad)
 target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 
+add_subdirectory(../external/glm ${CMAKE_CURRENT_BINARY_DIR}/glm)
+target_link_libraries(${PROJECT_NAME} PRIVATE glm)
+
 #imgui library create
 set(IMGUI_INCLUDES
 	../external/imgui/imgui.h
