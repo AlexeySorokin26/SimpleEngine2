@@ -1,5 +1,6 @@
 #include "SimpleEngineCore/Window.h"
 #include "SimpleEngineCore/Log.h"
+#include "SimpleEngineCore/Camera.h"
 #include "SimpleEngineCore/Rendering/OpenGL/ShaderProgram.h"
 #include "SimpleEngineCore/Rendering/OpenGL/VertexBuffer.h"
 #include "SimpleEngineCore/Rendering/OpenGL/VertexArray.h"
@@ -38,10 +39,11 @@ namespace SimpleEngine {
 		layout(location=0) in vec3 vertex_position; 
 		layout(location=1) in vec3 vertex_color;
 		uniform mat4 model_mat;
+		uniform mat4 view_proj_mat;
 		out vec3 color;
 		void main() {
 			color = vertex_color;
-			gl_Position = model_mat * vec4(vertex_position, 1.0); 
+			gl_Position = view_proj_mat * model_mat * vec4(vertex_position, 1.0); 
 		})";
 
 	const char* frag_shader =
@@ -61,6 +63,12 @@ namespace SimpleEngine {
 	float scale[3] = { 1.f, 1.f, 1.f };
 	float rotate = 0.f;
 	float translate[3] = { 0.f, 0.f, 0.f };
+
+	float camera_pos[3] = { 0.f, 0.f, 1.f };
+	float camera_rotation[3] = { 0.f, 0.f, 0.f };
+
+	bool perspective_camera = false;
+	Camera camera;
 
 	Window::Window(std::string title, const unsigned int width, const unsigned int height)
 		: m_data({ std::move(title), width, height }) {
@@ -207,6 +215,10 @@ namespace SimpleEngine {
 		ImGui::SliderFloat("Rotate", &rotate, 0.f, 360.f);
 		ImGui::SliderFloat3("Translate", translate, -10.f, 10.f);
 
+		ImGui::SliderFloat3("Cam pos", camera_pos, -10.f, 10.f);
+		ImGui::SliderFloat3("Cam rotation", camera_rotation, 0.f, 360);
+		ImGui::Checkbox("Perspective camera", &perspective_camera);
+
 		p_shader_program->bind();
 
 		glm::mat4 scale_mat(
@@ -231,6 +243,14 @@ namespace SimpleEngine {
 		glm::mat4 model_mat = translate_mat * rotate_mat * scale_mat;
 		p_shader_program->setMatrix4("model_mat", model_mat);
 
+		camera.set_position_rotation(
+			glm::vec3(camera_pos[0], camera_pos[1], camera_pos[2]),
+			glm::vec3(camera_rotation[0], camera_rotation[1], camera_rotation[2]));
+
+		camera.set_projection_mode(
+			perspective_camera ?
+			Camera::ProjectionMode::Perspective : Camera::ProjectionMode::Orthographic);
+		p_shader_program->setMatrix4("view_proj_mat", camera.get_projection_matrix() * camera.get_view_matrix());
 		p_vao->bind();
 		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(p_vao->get_indices_count()), GL_UNSIGNED_INT, nullptr);
 
