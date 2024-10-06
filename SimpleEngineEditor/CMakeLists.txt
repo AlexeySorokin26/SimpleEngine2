@@ -10,6 +10,8 @@ add_executable(
 target_link_libraries(
 	${PROJECT_NAME}
 	SimpleEngineCore
+	ImGui
+	glm
 )
 
 target_compile_features(
