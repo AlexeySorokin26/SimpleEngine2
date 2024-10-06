@@ -5,8 +5,8 @@
 #include "SimpleEngineCore/Rendering/OpenGL/VertexBuffer.h"
 #include "SimpleEngineCore/Rendering/OpenGL/VertexArray.h"
 #include "SimpleEngineCore/Rendering/OpenGL/IndexBuffer.h"
+#include "SimpleEngineCore/Rendering/OpenGL/Renderer_OpenGL.h"
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <imgui/imgui.h>
@@ -19,8 +19,6 @@
 #include <glm/trigonometric.hpp>
 
 namespace SimpleEngine {
-
-	static bool s_GLFW_initialized = false;
 
 	GLfloat pos_colors[] = {
 	   -0.5f, -0.5f, 0.0f,   1.0f, 1.0f, 0.0f,
@@ -88,13 +86,15 @@ namespace SimpleEngine {
 	int Window::init() {
 		LOG_INFO("Creating window {0} width size {1}x{2}", m_data.title, m_data.width, m_data.height);
 
-		if (!s_GLFW_initialized) {
-			if (!glfwInit())
+		glfwSetErrorCallback([](int error_code, const char* desc)
 			{
-				LOG_CRIT("Can't init GLFW!");
-				return -1;
+				LOG_CRIT("GLFW error: {0}", desc);
 			}
-			s_GLFW_initialized = true;
+		);
+		if (!glfwInit())
+		{
+			LOG_CRIT("Can't init GLFW!");
+			return -1;
 		}
 
 		/* Create a windowed mode window and its OpenGL context */
@@ -102,15 +102,11 @@ namespace SimpleEngine {
 		if (!m_pWindow)
 		{
 			LOG_CRIT("Can't create window {0}!", m_data.title);
-			glfwTerminate();
 			return -2;
 		}
 
-		/* Make the window's context current */
-		glfwMakeContextCurrent(m_pWindow);
-
-		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-			LOG_CRIT("Failed to init GLAD");
+		if (!Renderer_OpenGL::init(m_pWindow)) {
+			LOG_CRIT("Failed to init OpenGL renderer!");
 			return -3;
 		}
 
@@ -152,21 +148,21 @@ namespace SimpleEngine {
 				data.eventCallbackFn(event);
 			}
 		);
-		glfwSetWindowCloseCallback(m_pWindow, [](GLFWwindow* pWindow) {
-			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(pWindow);
+		glfwSetWindowCloseCallback(m_pWindow, [](GLFWwindow* pWindow)
+			{
+				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(pWindow);
 
-			// collect data for event
-			EventWindowClosed event;
+				// collect data for event
+				EventWindowClosed event;
 
-			// actually call our own callback to handle event
-			data.eventCallbackFn(event);
+				// actually call our own callback to handle event
+				data.eventCallbackFn(event);
 			}
 		);
 
 		glfwSetFramebufferSizeCallback(m_pWindow, [](GLFWwindow* pWindow, int w, int h)
 			{
-				//LOG_INFO("New buffer size {0}x{1}", w, h);
-				glViewport(0, 0, w, h);
+				Renderer_OpenGL::set_viewport(w, h);
 			}
 		);
 
@@ -196,8 +192,9 @@ namespace SimpleEngine {
 	}
 
 	void Window::on_update() {
-		glClearColor(m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
-		glClear(GL_COLOR_BUFFER_BIT);
+		Renderer_OpenGL::set_clear_color(
+			m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
+		Renderer_OpenGL::clear();
 
 		// set window size where imgui should draw
 		ImGuiIO& io = ImGui::GetIO();
@@ -251,8 +248,8 @@ namespace SimpleEngine {
 			perspective_camera ?
 			Camera::ProjectionMode::Perspective : Camera::ProjectionMode::Orthographic);
 		p_shader_program->setMatrix4("view_proj_mat", camera.get_projection_matrix() * camera.get_view_matrix());
-		p_vao->bind();
-		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(p_vao->get_indices_count()), GL_UNSIGNED_INT, nullptr);
+
+		Renderer_OpenGL::draw(*p_vao);
 
 		ImGui::End();
 
@@ -266,7 +263,19 @@ namespace SimpleEngine {
 	}
 
 	void Window::shutdown() {
+		// Shutdown ImGui backends first
+		ImGui_ImplGlfw_Shutdown();      // Shutdown the GLFW backend
+		ImGui_ImplOpenGL3_Shutdown();   // Shutdown the OpenGL backend
+
+		// Then destroy the ImGui context
+		if (ImGui::GetCurrentContext()) {
+			ImGui::DestroyContext();
+		}
+
+		// Cleanup GLFW window
 		glfwDestroyWindow(m_pWindow);
-		glfwTerminate();
+		m_pWindow = nullptr; // Prevent dangling pointer
+
+		glfwTerminate(); // Finally, terminate GLFW
 	}
 }
