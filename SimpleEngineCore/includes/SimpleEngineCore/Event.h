@@ -3,6 +3,8 @@
 #include <functional>
 #include <array>
 
+#include "Keys.h"
+
 namespace SimpleEngine {
 
 	enum class EventType {
@@ -75,5 +77,28 @@ namespace SimpleEngine {
 		unsigned int h;
 
 		static const EventType type = EventType::WindowResize;
+	};
+
+	struct EventKeyPressed : public BaseEvent {
+		EventKeyPressed(const KeyCode key_code, const bool repeat) :
+			key_code(key_code), repeat(repeat) {}
+		EventType get_type() const override {
+			return type;
+		}
+		const KeyCode key_code;
+		const bool repeat;
+
+		static const EventType type = EventType::MouseButtonPressed;
+	};
+
+	struct EventKeyReleased : public BaseEvent {
+		EventKeyReleased(const KeyCode key_code) :
+			key_code(key_code) {}
+		EventType get_type() const override {
+			return type;
+		}
+		const KeyCode key_code;
+
+		static const EventType type = EventType::MouseButtonReleased;
 	};
 }

@@ -1,6 +1,7 @@
 #include "SimpleEngineCore/Application.h"
 #include "SimpleEngineCore/Window.h"
 #include "SimpleEngineCore/Log.h"
+#include "SimpleEngineCore/Input.h"
 #include "SimpleEngineCore/Rendering/OpenGL/VertexBuffer.h"
 #include "SimpleEngineCore/Rendering/OpenGL/VertexArray.h"
 #include "SimpleEngineCore/Rendering/OpenGL/IndexBuffer.h"
@@ -86,6 +87,18 @@ namespace SimpleEngine {
 			[&](EventWindowClosed& event) {
 				LOG_INFO("[WindowClosed]");
 				m_bCloseWindow = true;
+			}
+		);
+		m_event_dispatcher.add_event_listener<EventKeyPressed>(
+			[&](EventKeyPressed& event) {
+				LOG_INFO("[EventKeyPressed]");
+				Input::PressKey(event.key_code);
+			}
+		);
+		m_event_dispatcher.add_event_listener<EventKeyReleased>(
+			[&](EventKeyReleased& event) {
+				LOG_INFO("[EventKeyReleased]");
+				Input::ReleaseKey(event.key_code);
 			}
 		);
 		m_pWindow->set_event_callback(

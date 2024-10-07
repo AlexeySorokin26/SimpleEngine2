@@ -49,6 +49,34 @@ namespace SimpleEngine {
 		// set data in pointer. since we need to have it from glfwSetWindowSizeCallback only using m_pWindow
 		glfwSetWindowUserPointer(m_pWindow, &m_data);
 
+		glfwSetKeyCallback(m_pWindow,
+			[](GLFWwindow* pWindow, int key, int scancode, int action, int mods)
+			{
+				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(pWindow);
+				switch (action)
+				{
+				case GLFW_PRESS:
+				{
+					EventKeyPressed event(static_cast<KeyCode>(key), false);
+					data.eventCallbackFn(event);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					EventKeyReleased event(static_cast<KeyCode>(key));
+					data.eventCallbackFn(event);
+					break;
+				}
+				case GLFW_REPEAT:
+				{
+					EventKeyPressed event(static_cast<KeyCode>(key), true);
+					data.eventCallbackFn(event);
+					break;
+				}
+				}
+			}
+		);
+
 		// We call this function if windows size changed
 		glfwSetWindowSizeCallback(m_pWindow,
 			[](GLFWwindow* pWindow, int width, int height)
