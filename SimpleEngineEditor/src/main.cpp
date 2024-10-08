@@ -3,10 +3,81 @@
 #include <imgui/imgui.h>
 
 #include "SimpleEngineCore/Application.h"
+#include <SimpleEngineCore/Input.h>
 
 class SimpleEngineEditor : public SimpleEngine::Application {
 	virtual void on_update() override {
-		//std::cout << "Update frame: " << frame++ << std::endl;
+		glm::vec3 movment_delta{ 0,0,0 };
+		glm::vec3 rotation_delta{ 0,0,0 };
+		bool move = false;
+		// z
+		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_W))
+		{
+			movment_delta.x += 0.05f;
+			move = true;
+		}
+		// z
+		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_S))
+		{
+			movment_delta.x -= 0.05f;
+			move = true;
+		}
+		// x
+		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_A))
+		{
+			movment_delta.y -= 0.05f;
+			move = true;
+		}
+		// x
+		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_D))
+		{
+			movment_delta.y += 0.05f;
+			move = true;
+		}
+		// y
+		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_E))
+		{
+			movment_delta.z += 0.05f;
+			move = true;
+		}
+		// y
+		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_Q))
+		{
+			movment_delta.z -= 0.05f;
+			move = true;
+		}
+		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_UP))
+		{
+			rotation_delta.y -= 0.05f;
+			move = true;
+		}
+		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_DOWN))
+		{
+			rotation_delta.y += 0.05f;
+			move = true;
+		}
+		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_RIGHT))
+		{
+			rotation_delta.z -= 0.05f;
+			move = true;
+		}
+		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_LEFT))
+		{
+			rotation_delta.z += 0.05f;
+			move = true;
+		}
+		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_P))
+		{
+			rotation_delta.x += 0.05f;
+			move = true;
+		}
+		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_O))
+		{
+			rotation_delta.x -= 0.05f;
+			move = true;
+		}
+		if(move)
+			camera.add_movement_and_rotation(movment_delta, rotation_delta);
 	}
 
 	virtual void on_ui_draw() override {
