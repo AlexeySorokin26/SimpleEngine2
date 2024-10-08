@@ -76,15 +76,30 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 			rotation_delta.x -= 0.05f;
 			move = true;
 		}
-		if(move)
+		if (move)
 			camera.add_movement_and_rotation(movment_delta, rotation_delta);
 	}
 
 	virtual void on_ui_draw() override {
+		camera_pos[0] = camera.get_camera_pos().x;
+		camera_pos[1] = camera.get_camera_pos().y;
+		camera_pos[2] = camera.get_camera_pos().z;
+
+		camera_rotation[0] = camera.get_camera_rotation().x;
+		camera_rotation[1] = camera.get_camera_rotation().y;
+		camera_rotation[2] = camera.get_camera_rotation().z;
+
 		ImGui::Begin("Editor");
-		ImGui::SliderFloat3("Cam pos", camera_pos, -10.f, 10.f);
-		ImGui::SliderFloat3("Cam rotation", camera_rotation, 0.f, 360);
-		ImGui::Checkbox("Perspective camera", &perspective_camera);
+		// if we change value
+		if (ImGui::SliderFloat3("Cam pos", camera_pos, -10.f, 10.f)) {
+			camera.set_position(glm::vec3(camera_pos[0], camera_pos[1], camera_pos[2]));
+		}
+		if (ImGui::SliderFloat3("Cam rotation", camera_rotation, 0.f, 360)) {
+			camera.set_rotation(glm::vec3(camera_rotation[0], camera_rotation[1], camera_rotation[2]));
+		}
+		if (ImGui::Checkbox("Perspective camera", &perspective_camera)) {
+			camera.set_projection_mode(perspective_camera ? SimpleEngine::Camera::ProjectionMode::Perspective : SimpleEngine::Camera::ProjectionMode::Orthographic);
+		}
 		ImGui::End();
 	}
 

@@ -33,6 +33,10 @@ namespace SimpleEngine {
 		void move_forward(const float delta);
 		void move_right(const float delta);
 		void move_up(const float delta);
+
+		const glm::vec3& get_camera_pos() const { return m_position; }
+		const glm::vec3& get_camera_rotation() const { return m_rotation; }
+
 		void add_movement_and_rotation(const glm::vec3& movement_delta, const glm::vec3& rotation_delta);
 	private:
 		void update_view_matrix();
