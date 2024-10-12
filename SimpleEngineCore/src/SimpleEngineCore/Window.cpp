@@ -112,6 +112,7 @@ namespace SimpleEngine {
 				data.eventCallbackFn(event);
 			}
 		);
+
 		glfwSetWindowCloseCallback(m_pWindow, [](GLFWwindow* pWindow)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(pWindow);
@@ -130,6 +131,32 @@ namespace SimpleEngine {
 			}
 		);
 
+		glfwSetMouseButtonCallback(m_pWindow,
+			[](GLFWwindow* pWindow, int button, int action, int mods)
+			{
+				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(pWindow);
+				double x_pos;
+				double y_pos;
+				glfwGetCursorPos(pWindow, &x_pos, &y_pos);
+
+				switch (action)
+				{
+				case GLFW_PRESS:
+				{
+					EventMouseButtonPressed event(static_cast<MouseButtonCode>(button), x_pos, y_pos);
+					data.eventCallbackFn(event);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					EventMouseButtonReleased event(static_cast<MouseButtonCode>(button), x_pos, y_pos);
+					data.eventCallbackFn(event);
+					break;
+				}
+				}
+			}
+		);
+
 		UIModule::on_window_create(m_pWindow);
 
 		return 0;
@@ -138,6 +165,13 @@ namespace SimpleEngine {
 	void Window::on_update() {
 		glfwSwapBuffers(m_pWindow);
 		glfwPollEvents();
+	}
+
+	glm::vec2 Window::get_current_cursor_pos() const {
+		double x_pos;
+		double y_pos;
+		glfwGetCursorPos(m_pWindow, &x_pos, &y_pos);
+		return { x_pos, y_pos };
 	}
 
 	void Window::shutdown() {

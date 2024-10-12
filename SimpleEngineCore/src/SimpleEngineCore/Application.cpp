@@ -101,6 +101,20 @@ namespace SimpleEngine {
 				Input::ReleaseKey(event.key_code);
 			}
 		);
+		m_event_dispatcher.add_event_listener<EventMouseButtonPressed>(
+			[&](EventMouseButtonPressed& event) {
+				LOG_INFO("[EventMouseButtonPressed]");
+				Input::PressMouseButton(event.mouse_button_code);
+				on_mouse_button_event(event.mouse_button_code, event.x_pos, event.y_pos, true);
+			}
+		);
+		m_event_dispatcher.add_event_listener<EventMouseButtonReleased>(
+			[&](EventMouseButtonReleased& event) {
+				LOG_INFO("[EventMouseButtonReleased]");
+				Input::ReleaseMouseButton(event.mouse_button_code);
+				on_mouse_button_event(event.mouse_button_code, event.x_pos, event.y_pos, false);
+			}
+		);
 		m_pWindow->set_event_callback(
 			[&](BaseEvent& event) {
 				m_event_dispatcher.dispatch(event);
@@ -193,4 +207,9 @@ namespace SimpleEngine {
 
 		return 0;
 	}
+
+	glm::vec2 Application::get_current_cursor_pos() const {
+		return m_pWindow->get_current_cursor_pos();
+	}
+
 }

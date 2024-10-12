@@ -16,6 +16,9 @@ namespace SimpleEngine {
 
 		// set window size where imgui should draw
 		ImGuiIO& io = ImGui::GetIO();
+		ImFontConfig font_config;
+		font_config.SizePixels = 30.0f; // Установите размер шрифта здесь
+		io.Fonts->AddFontDefault(&font_config);
 		io.ConfigFlags |= ImGuiConfigFlags_::ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_::ImGuiConfigFlags_ViewportsEnable;
 

@@ -88,7 +88,7 @@ namespace SimpleEngine {
 		const KeyCode key_code;
 		const bool repeat;
 
-		static const EventType type = EventType::MouseButtonPressed;
+		static const EventType type = EventType::KeyPressed;
 	};
 
 	struct EventKeyReleased : public BaseEvent {
@@ -99,6 +99,26 @@ namespace SimpleEngine {
 		}
 		const KeyCode key_code;
 
+		static const EventType type = EventType::KeyReleased;
+	};
+
+	struct EventMouseButtonPressed : public BaseEvent {
+		EventMouseButtonPressed(
+			const MouseButtonCode mouse_button_code, const double x_pos, const double y_pos) :
+			mouse_button_code(mouse_button_code), x_pos(x_pos), y_pos(y_pos) {}
+		EventType get_type() const override { return type; }
+		const MouseButtonCode mouse_button_code;
+		const double x_pos; const double y_pos;
+		static const EventType type = EventType::MouseButtonPressed;
+	};
+
+	struct EventMouseButtonReleased : public BaseEvent {
+		EventMouseButtonReleased(
+			const MouseButtonCode mouse_button_code, const double x_pos, const double y_pos) :
+			mouse_button_code(mouse_button_code), x_pos(x_pos), y_pos(y_pos) {}
+		EventType get_type() const override { return type; }
+		const MouseButtonCode mouse_button_code;
+		const double x_pos; const double y_pos;
 		static const EventType type = EventType::MouseButtonReleased;
 	};
 }

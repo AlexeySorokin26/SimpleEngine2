@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 set(PROJECT_NAME SimpleEngine2)
+project(${PROJECT_NAME})
+
 
 add_subdirectory(SimpleEngineCore)
 add_subdirectory(SimpleEngineEditor)

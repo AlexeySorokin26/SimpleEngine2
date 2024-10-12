@@ -14,6 +14,13 @@ namespace SimpleEngine {
 		update_view_matrix();
 		update_projection_matrix();
 	}
+	glm::mat4 Camera::get_view_matrix()
+	{
+		if (m_update_view_matrix) {
+			update_view_matrix();
+		}
+		return m_view_matrix;
+	}
 	void Camera::update_view_matrix()
 	{
 		float roll_in_radians_x = glm::radians(m_rotation.x);
@@ -79,18 +86,18 @@ namespace SimpleEngine {
 	void Camera::set_position(const glm::vec3& position)
 	{
 		m_position = position;
-		update_view_matrix();
+		m_update_view_matrix = true;
 	}
 	void Camera::set_rotation(const glm::vec3& rotation)
 	{
 		m_rotation = rotation;
-		update_view_matrix();
+		m_update_view_matrix = true;
 	}
 	void Camera::set_position_rotation(const glm::vec3& position, const glm::vec3& rotation)
 	{
 		m_position = position;
 		m_rotation = rotation;
-		update_view_matrix();
+		m_update_view_matrix = true;
 	}
 	void Camera::set_projection_mode(const ProjectionMode projection_mode)
 	{
@@ -100,17 +107,17 @@ namespace SimpleEngine {
 	void Camera::move_forward(const float delta)
 	{
 		m_position += m_right * delta;
-		update_view_matrix();
+		m_update_view_matrix = true;
 	}
 	void Camera::move_right(const float delta)
 	{
 		m_position += m_right * delta;
-		update_view_matrix();
+		m_update_view_matrix = true;
 	}
-	void Camera::move_up(const float delta)
+	void Camera::move_up(const float delta) // the same is in unreal engine 
 	{
-		m_position += m_up * delta;
-		update_view_matrix();
+		m_position += s_world_up * delta; // the same is in unreal engine 
+		m_update_view_matrix = true;
 	}
 	void Camera::add_movement_and_rotation(const glm::vec3& movement_delta, const glm::vec3& rotation_delta)
 	{
@@ -119,6 +126,6 @@ namespace SimpleEngine {
 		m_position += m_up * movement_delta.z;
 
 		m_rotation += rotation_delta;
-		update_view_matrix();
+		m_update_view_matrix = true;
 	}
 }
