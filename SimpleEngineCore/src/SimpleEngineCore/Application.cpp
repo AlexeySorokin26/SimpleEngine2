@@ -246,12 +246,13 @@ namespace SimpleEngine {
 
 
 		// second texture
+		const GLsizei mip_levels = static_cast<GLsizei>(log2(std::max(w, h))) + 1;
 		GLuint textureHandle_quads;
 		// (target could be cube, how many handles, handle)
 		glCreateTextures(GL_TEXTURE_2D, 1, &textureHandle_quads);
 		// allocate memory on gpu
 		// (handle, how many mipmaps, internval fomat, size)
-		glTextureStorage2D(textureHandle_quads, 1, GL_RGB8, w, h);
+		glTextureStorage2D(textureHandle_quads, mip_levels, GL_RGB8, w, h);
 		// load texture into gpu from cpu
 		// generate data by hand
 		generate_quads_texture(data, w, h);
@@ -261,8 +262,10 @@ namespace SimpleEngine {
 		// set few parameters
 		glTextureParameteri(textureHandle_quads, GL_TEXTURE_WRAP_S, GL_REPEAT);     // how to handle if we out of our texture S-Y
 		glTextureParameteri(textureHandle_quads, GL_TEXTURE_WRAP_T, GL_REPEAT);     // how to handle if we out of our texture S-Y
-		glTextureParameteri(textureHandle_quads, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // how to handle if we too close to texture
+		glTextureParameteri(textureHandle_quads, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // how to handle if we too close to texture
 		glTextureParameteri(textureHandle_quads, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // how to handle if we too close too far and more than 1 pixels should be in texture
+		// automatically generate mip map levels 
+		glGenerateTextureMipmap(textureHandle_quads);
 		// use texture
 		// (place where to bind texture, handle)
 		glBindTextureUnit(1, textureHandle_quads);
