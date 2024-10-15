@@ -136,6 +136,9 @@ namespace SimpleEngine {
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(pWindow);
 
+				EventMouseScroll event(xoffset, yoffset);
+
+				data.eventCallbackFn(event);
 			});
 
 		glfwSetMouseButtonCallback(m_pWindow,

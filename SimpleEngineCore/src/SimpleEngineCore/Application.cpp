@@ -214,6 +214,14 @@ namespace SimpleEngine {
 				on_mouse_button_event(event.mouse_button_code, event.x_pos, event.y_pos, false);
 			}
 		);
+
+		m_event_dispatcher.add_event_listener<EventMouseScroll>(
+			[&](EventMouseScroll& event) {
+				LOG_INFO("[EventMouseScroll]");
+				scroll = true;
+			}
+		);
+
 		m_pWindow->set_event_callback(
 			[&](BaseEvent& event) {
 				m_event_dispatcher.dispatch(event);

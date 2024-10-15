@@ -18,6 +18,8 @@ namespace SimpleEngine {
 		MouseButtonReleased,
 		MouseMoved,
 
+		MouseScroll,
+
 
 		EventsCount
 	};
@@ -122,13 +124,12 @@ namespace SimpleEngine {
 		static const EventType type = EventType::MouseButtonReleased;
 	};
 
-	//struct EventMouseScroll : public BaseEvent {
-	//	EventMouseScroll(
-	//		const MouseButtonCode mouse_button_code, const double x_pos, const double y_pos) :
-	//		mouse_button_code(mouse_button_code), x_pos(x_pos), y_pos(y_pos) {}
-	//	EventType get_type() const override { return type; }
-	//	const MouseButtonCode mouse_button_code;
-	//	const double x_pos; const double y_pos;
-	//	static const EventType type = EventType::MouseButtonReleased;
-	//};
+	struct EventMouseScroll : public BaseEvent {
+		EventMouseScroll(
+			const double xoffset, const double yoffset) :
+			xoffset(xoffset), yoffset(yoffset) {}
+		EventType get_type() const override { return type; }
+		const double xoffset; const double yoffset;
+		static const EventType type = EventType::MouseScroll;
+	};
 }
