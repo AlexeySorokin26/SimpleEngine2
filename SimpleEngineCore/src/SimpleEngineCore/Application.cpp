@@ -24,10 +24,11 @@
 namespace SimpleEngine {
 
 	GLfloat pos_colors[] = {
-		0.0f, -0.5f, -0.5f,   1.0f, 1.0f, 0.0f,		1.f, 0.f,
-		0.0f, 0.5f,  -0.5f,   0.0f, 1.0f, 1.0f,		0.f, 0.f,
-		0.0f, -0.5f, 0.5f,    1.0f, 0.0f, 1.0f,		1.f, 1.f,
-		0.0f, 0.5f,  0.5f,    1.0f, 0.0f, 0.0f,		0.f, 1.f
+		// vertex coord (X,Y,Z)  // color rgb           // texture (T,S)
+		0.0f, -0.5f, -0.5f,      1.0f, 1.0f, 0.0f,		2.f, -1.f,
+		0.0f, 0.5f,  -0.5f,      0.0f, 1.0f, 1.0f,		-1.f, -1.f,
+		0.0f, -0.5f, 0.5f,       1.0f, 0.0f, 1.0f,		2.f, 2.f,
+		0.0f, 0.5f,  0.5f,       1.0f, 0.0f, 0.0f,		-1.f, 2.f
 	};
 
 	GLuint indices[] = {
@@ -44,12 +45,13 @@ namespace SimpleEngine {
 		const unsigned char color_g,
 		const unsigned char color_b)
 	{
-		for (unsigned int x = 0; x < width; ++x)
+		for (unsigned int y = 0; y < height; ++y)
 		{
-			for (unsigned int y = 0; y < height; ++y)
+			for (unsigned int x = 0; x < width; ++x)
 			{
 				if ((x - center_x) * (x - center_x) + (y - center_y) * (y - center_y) < radius * radius)
 				{
+					// shift computed in bytes not in pixels
 					data[3 * (x + width * y) + 0] = color_r;
 					data[3 * (x + width * y) + 1] = color_g;
 					data[3 * (x + width * y) + 2] = color_b;
@@ -82,6 +84,31 @@ namespace SimpleEngine {
 		generate_circle(data, width, height, width * 0.65, height * 0.6, width * 0.07, 0, 0, 255);
 	}
 
+	void generate_quads_texture(
+		unsigned char* data,
+		const unsigned int width,
+		const unsigned int height)
+	{
+		for (unsigned int x = 0; x < width; ++x)
+		{
+			for (unsigned int y = 0; y < height; ++y)
+			{
+				if ((x < width / 2 && y < height / 2) || x >= width / 2 && y >= height / 2)
+				{
+					data[3 * (x + width * y) + 0] = 0;
+					data[3 * (x + width * y) + 1] = 0;
+					data[3 * (x + width * y) + 2] = 0;
+				}
+				else
+				{
+					data[3 * (x + width * y) + 0] = 255;
+					data[3 * (x + width * y) + 1] = 255;
+					data[3 * (x + width * y) + 2] = 255;
+				}
+			}
+		}
+	}
+
 	// location is a position where shader should search data like pos in function when we are passing data
 	const char* vertex_shader =
 		R"(
@@ -93,13 +120,16 @@ namespace SimpleEngine {
 
 		uniform mat4 model_mat;
 		uniform mat4 view_proj_mat;
+		uniform int current_frame;
 
 		out vec3 color;
-		out vec2 tex_coord;
+		out vec2 tex_coord_smile;
+		out vec2 tex_coord_quads;
 
 		void main() {
 			color = vertex_color;
-			tex_coord = texture_coord;
+			tex_coord_smile = texture_coord;
+			tex_coord_quads = texture_coord + vec2(current_frame / 1000.f, current_frame / 1000.f);
 			gl_Position = view_proj_mat * model_mat * vec4(vertex_position, 1.0); 
 		})";
 
@@ -108,15 +138,17 @@ namespace SimpleEngine {
 		#version 460
 
 		in vec3 color;
-		in vec2 tex_coord;
+		in vec2 tex_coord_smile;
+		in vec2 tex_coord_quads;
 		
-		layout(binding=0) uniform sampler2D InTexture;
+		layout(binding=0) uniform sampler2D InTexture_Smile;
+		layout(binding=1) uniform sampler2D InTexture_Quads;
 		
 		out vec4 frag_color;
 
 		void main() {
 			//frag_color = vec4(color, 1.0);
-			frag_color = texture(InTexture, tex_coord);
+			frag_color = texture(InTexture_Smile, tex_coord_smile) * texture(InTexture_Quads, tex_coord_quads);
 		})";
 
 	float m_background_color[] = { 0, 0, 0, 1 };
@@ -191,19 +223,49 @@ namespace SimpleEngine {
 		const unsigned int channels = 3; // rgb 
 		auto* data = new unsigned char[w * h * channels];
 
-		GLuint textureHandle;
-		glCreateTextures(GL_TEXTURE_2D, 1, &textureHandle);
+		GLuint textureHandle_smile;
+		// (target could be cube, how many handles, handle)
+		glCreateTextures(GL_TEXTURE_2D, 1, &textureHandle_smile);
 		// allocate memory on gpu
-		glTextureStorage2D(textureHandle, 1, GL_RGB8, w, h);
+		// (handle, how many mipmaps, internval fomat, size)
+		glTextureStorage2D(textureHandle_smile, 1, GL_RGB8, w, h);
 		// load texture into gpu from cpu
-		generate_smile_texture(data, w, h); // by hand
-		glTextureSubImage2D(textureHandle, 0, 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glTextureParameteri(textureHandle, GL_TEXTURE_WRAP_S, GL_REPEAT); // how to handle if we out of our texture S-Y
-		glTextureParameteri(textureHandle, GL_TEXTURE_WRAP_T, GL_REPEAT); // how to handle if we out of our texture S-Y
-		glTextureParameteri(textureHandle, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // how to handle if we too close to texture
-		glTextureParameteri(textureHandle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);// how to handle if we too close too far and more than 1 pixels should be in texture
+		// generate data by hand
+		generate_smile_texture(data, w, h);
+		// load it into gpu 
+		// (handle, level mip map, offset in memory to fill whatever part of image, w, h, data format, data type, pointer to data)
+		glTextureSubImage2D(textureHandle_smile, 0, 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
+		// set few parameters
+		glTextureParameteri(textureHandle_smile, GL_TEXTURE_WRAP_S, GL_REPEAT);     // how to handle if we out of our texture S-Y
+		glTextureParameteri(textureHandle_smile, GL_TEXTURE_WRAP_T, GL_REPEAT);     // how to handle if we out of our texture S-Y
+		glTextureParameteri(textureHandle_smile, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // how to handle if we too close to texture
+		glTextureParameteri(textureHandle_smile, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // how to handle if we too close too far and more than 1 pixels should be in texture
 		// use texture
-		glBindTextureUnit(0, textureHandle);
+		// (place where to bind texture, handle)
+		glBindTextureUnit(0, textureHandle_smile);
+
+
+		// second texture
+		GLuint textureHandle_quads;
+		// (target could be cube, how many handles, handle)
+		glCreateTextures(GL_TEXTURE_2D, 1, &textureHandle_quads);
+		// allocate memory on gpu
+		// (handle, how many mipmaps, internval fomat, size)
+		glTextureStorage2D(textureHandle_quads, 1, GL_RGB8, w, h);
+		// load texture into gpu from cpu
+		// generate data by hand
+		generate_quads_texture(data, w, h);
+		// load it into gpu 
+		// (handle, level mip map, offset in memory to fill whatever part of image, w, h, data format, data type, pointer to data)
+		glTextureSubImage2D(textureHandle_quads, 0, 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
+		// set few parameters
+		glTextureParameteri(textureHandle_quads, GL_TEXTURE_WRAP_S, GL_REPEAT);     // how to handle if we out of our texture S-Y
+		glTextureParameteri(textureHandle_quads, GL_TEXTURE_WRAP_T, GL_REPEAT);     // how to handle if we out of our texture S-Y
+		glTextureParameteri(textureHandle_quads, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // how to handle if we too close to texture
+		glTextureParameteri(textureHandle_quads, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // how to handle if we too close too far and more than 1 pixels should be in texture
+		// use texture
+		// (place where to bind texture, handle)
+		glBindTextureUnit(1, textureHandle_quads);
 
 		delete[] data;
 
@@ -211,7 +273,7 @@ namespace SimpleEngine {
 		//-----------------------------------------//
 		// First we create shader programms
 		p_shader_program = std::make_unique<ShaderProgram>(vertex_shader, frag_shader);
-		if (!p_shader_program->isCompiled())
+		if (!p_shader_program->is_compiled())
 			return false;
 
 		BufferLayout buffer_layout_vec3_vec3_vec2
@@ -233,6 +295,7 @@ namespace SimpleEngine {
 		p_vao->set_index_buffer(*p_index_buffer);
 		//-----------------------------------------//
 
+		static int current_frame = 0;
 		while (!m_bCloseWindow) {
 			Renderer_OpenGL::set_clear_color(
 				m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
@@ -262,12 +325,13 @@ namespace SimpleEngine {
 				0, 0, 1, 0,
 				translate[0], translate[1], translate[2], 1);
 			glm::mat4 model_mat = translate_mat * rotate_mat * scale_mat;
-			p_shader_program->setMatrix4("model_mat", model_mat);
+			p_shader_program->set_matrix4("model_mat", model_mat);
+			p_shader_program->set_int("current_frame", current_frame++);
 
 			camera.set_projection_mode(
 				perspective_camera ?
 				Camera::ProjectionMode::Perspective : Camera::ProjectionMode::Orthographic);
-			p_shader_program->setMatrix4("view_proj_mat", camera.get_projection_matrix() * camera.get_view_matrix());
+			p_shader_program->set_matrix4("view_proj_mat", camera.get_projection_matrix() * camera.get_view_matrix());
 
 			Renderer_OpenGL::draw(*p_vao);
 
@@ -293,7 +357,8 @@ namespace SimpleEngine {
 			on_update();
 		}
 
-		glDeleteTextures(1, &textureHandle);
+		glDeleteTextures(1, &textureHandle_smile);
+		glDeleteTextures(1, &textureHandle_quads);
 		m_pWindow = nullptr;
 		return 0;
 	}

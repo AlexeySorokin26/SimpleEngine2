@@ -26,7 +26,7 @@ namespace SimpleEngine {
 		}
 		return true;
 	}
-	SimpleEngine::ShaderProgram::ShaderProgram(const char* vertex_shader_src, const char* frag_shader_src)
+	ShaderProgram::ShaderProgram(const char* vertex_shader_src, const char* frag_shader_src)
 	{
 		GLuint vertex_shader_id = 0;
 		if (!create_shader(vertex_shader_src, GL_VERTEX_SHADER, vertex_shader_id)) {
@@ -72,7 +72,7 @@ namespace SimpleEngine {
 		glDeleteShader(frag_shader_id);
 	}
 
-	SimpleEngine::ShaderProgram::ShaderProgram(ShaderProgram&& shaderProgram)
+	ShaderProgram::ShaderProgram(ShaderProgram&& shaderProgram)
 	{
 		m_id = shaderProgram.m_id;
 		m_isCompiled = shaderProgram.m_isCompiled;
@@ -81,7 +81,7 @@ namespace SimpleEngine {
 		shaderProgram.m_isCompiled = false;
 	}
 
-	ShaderProgram& SimpleEngine::ShaderProgram::operator=(ShaderProgram&& shaderProgram)
+	ShaderProgram& ShaderProgram::operator=(ShaderProgram&& shaderProgram)
 	{
 		glDeleteProgram(m_id);
 		m_id = shaderProgram.m_id;
@@ -92,24 +92,29 @@ namespace SimpleEngine {
 		return *this;
 	}
 
-	SimpleEngine::ShaderProgram::~ShaderProgram()
+	ShaderProgram::~ShaderProgram()
 	{
 		glDeleteProgram(m_id);
 	}
 
-	void SimpleEngine::ShaderProgram::bind() const
+	void ShaderProgram::bind() const
 	{
 		// make shader current
 		glUseProgram(m_id);
 	}
 
-	void SimpleEngine::ShaderProgram::unbind()
+	void ShaderProgram::unbind()
 	{
 		glUseProgram(0); // means 0 shader 
 	}
 
-	void SimpleEngine::ShaderProgram::setMatrix4(const char* name, const glm::mat4& matrix) const {
+	void ShaderProgram::set_matrix4(const char* name, const glm::mat4& matrix) const {
 		// get location by name, amount of args, transponse or not, pointer to data specially for glm such way
 		glUniformMatrix4fv(glGetUniformLocation(m_id, name), 1, GL_FALSE, glm::value_ptr(matrix));
+	}
+
+
+	void ShaderProgram::set_int(const char* name, const int value) const {
+		glUniform1i(glGetUniformLocation(m_id, name), value);
 	}
 }

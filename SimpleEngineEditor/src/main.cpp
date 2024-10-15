@@ -130,7 +130,7 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 int main() {
 	auto myApp = std::make_unique<SimpleEngineEditor>();
 
-	int returnCode = myApp->start(1024, 768, "My first app");
+	int returnCode = myApp->start(1024, 1024, "My first app");
 
 	return returnCode;
 }
