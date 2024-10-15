@@ -131,6 +131,13 @@ namespace SimpleEngine {
 			}
 		);
 
+		glfwSetScrollCallback(m_pWindow,
+			[](GLFWwindow* pWindow, double xoffset, double yoffset)
+			{
+				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(pWindow);
+
+			});
+
 		glfwSetMouseButtonCallback(m_pWindow,
 			[](GLFWwindow* pWindow, int button, int action, int mods)
 			{

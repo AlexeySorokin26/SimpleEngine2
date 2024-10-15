@@ -65,6 +65,9 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 			rotation_delta.x -= 0.05f;
 		}
 
+		//if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_LEFT_CONTROL)) {
+		//	if()
+		//}
 
 		if (SimpleEngine::Input::IsMouseButtonPressed(SimpleEngine::MouseButtonCode::MOUSE_BUTTON_RIGHT))
 		{

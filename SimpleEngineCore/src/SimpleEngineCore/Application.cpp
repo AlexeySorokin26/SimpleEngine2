@@ -7,12 +7,11 @@
 #include "SimpleEngineCore/Rendering/OpenGL/IndexBuffer.h"
 #include "SimpleEngineCore/Rendering/OpenGL/Renderer_OpenGL.h"
 #include "SimpleEngineCore/Rendering/OpenGL/ShaderProgram.h"
+#include "SimpleEngineCore/Rendering/OpenGL/Texture2D.h"
 #include "SimpleEngineCore/MOdules/UIModule.h"
 
 #include <glm/mat3x3.hpp>
 #include <glm/trigonometric.hpp>
-
-#include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -157,6 +156,8 @@ namespace SimpleEngine {
 	std::unique_ptr<VertexBuffer> p_pos_colors_vbo;
 	std::unique_ptr<IndexBuffer> p_index_buffer;
 	std::unique_ptr<VertexArray> p_vao;
+	std::unique_ptr<Texture2D> p_texture_smile;
+	std::unique_ptr<Texture2D> p_texture_quads;
 	float scale[3] = { 1.f, 1.f, 1.f };
 	float rotate = 0.f;
 	float translate[3] = { 0.f, 0.f, 0.f };
@@ -222,53 +223,13 @@ namespace SimpleEngine {
 		const unsigned int h = 1000;
 		const unsigned int channels = 3; // rgb 
 		auto* data = new unsigned char[w * h * channels];
-
-		GLuint textureHandle_smile;
-		// (target could be cube, how many handles, handle)
-		glCreateTextures(GL_TEXTURE_2D, 1, &textureHandle_smile);
-		// allocate memory on gpu
-		// (handle, how many mipmaps, internval fomat, size)
-		glTextureStorage2D(textureHandle_smile, 1, GL_RGB8, w, h);
-		// load texture into gpu from cpu
-		// generate data by hand
 		generate_smile_texture(data, w, h);
-		// load it into gpu 
-		// (handle, level mip map, offset in memory to fill whatever part of image, w, h, data format, data type, pointer to data)
-		glTextureSubImage2D(textureHandle_smile, 0, 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
-		// set few parameters
-		glTextureParameteri(textureHandle_smile, GL_TEXTURE_WRAP_S, GL_REPEAT);     // how to handle if we out of our texture S-Y
-		glTextureParameteri(textureHandle_smile, GL_TEXTURE_WRAP_T, GL_REPEAT);     // how to handle if we out of our texture S-Y
-		glTextureParameteri(textureHandle_smile, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // how to handle if we too close to texture
-		glTextureParameteri(textureHandle_smile, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // how to handle if we too close too far and more than 1 pixels should be in texture
-		// use texture
-		// (place where to bind texture, handle)
-		glBindTextureUnit(0, textureHandle_smile);
+		p_texture_smile = std::make_unique<Texture2D>(data, w, h);
+		p_texture_smile->bind(0);
 
-
-		// second texture
-		const GLsizei mip_levels = static_cast<GLsizei>(log2(std::max(w, h))) + 1;
-		GLuint textureHandle_quads;
-		// (target could be cube, how many handles, handle)
-		glCreateTextures(GL_TEXTURE_2D, 1, &textureHandle_quads);
-		// allocate memory on gpu
-		// (handle, how many mipmaps, internval fomat, size)
-		glTextureStorage2D(textureHandle_quads, mip_levels, GL_RGB8, w, h);
-		// load texture into gpu from cpu
-		// generate data by hand
 		generate_quads_texture(data, w, h);
-		// load it into gpu 
-		// (handle, level mip map, offset in memory to fill whatever part of image, w, h, data format, data type, pointer to data)
-		glTextureSubImage2D(textureHandle_quads, 0, 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
-		// set few parameters
-		glTextureParameteri(textureHandle_quads, GL_TEXTURE_WRAP_S, GL_REPEAT);     // how to handle if we out of our texture S-Y
-		glTextureParameteri(textureHandle_quads, GL_TEXTURE_WRAP_T, GL_REPEAT);     // how to handle if we out of our texture S-Y
-		glTextureParameteri(textureHandle_quads, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // how to handle if we too close to texture
-		glTextureParameteri(textureHandle_quads, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // how to handle if we too close too far and more than 1 pixels should be in texture
-		// automatically generate mip map levels 
-		glGenerateTextureMipmap(textureHandle_quads);
-		// use texture
-		// (place where to bind texture, handle)
-		glBindTextureUnit(1, textureHandle_quads);
+		p_texture_quads = std::make_unique<Texture2D>(data, w, h);
+		p_texture_quads->bind(1);
 
 		delete[] data;
 
@@ -360,8 +321,6 @@ namespace SimpleEngine {
 			on_update();
 		}
 
-		glDeleteTextures(1, &textureHandle_smile);
-		glDeleteTextures(1, &textureHandle_quads);
 		m_pWindow = nullptr;
 		return 0;
 	}
