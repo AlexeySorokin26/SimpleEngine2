@@ -12,6 +12,7 @@
 
 #include <glm/mat3x3.hpp>
 #include <glm/trigonometric.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -22,16 +23,34 @@
 
 namespace SimpleEngine {
 
-	GLfloat pos_colors[] = {
-		// vertex coord (X,Y,Z)  // color rgb           // texture (T,S)
-		0.0f, -0.5f, -0.5f,      1.0f, 1.0f, 0.0f,		2.f, -1.f,
-		0.0f, 0.5f,  -0.5f,      0.0f, 1.0f, 1.0f,		-1.f, -1.f,
-		0.0f, -0.5f, 0.5f,       1.0f, 0.0f, 1.0f,		2.f, 2.f,
-		0.0f, 0.5f,  0.5f,       1.0f, 0.0f, 0.0f,		-1.f, 2.f
+	//GLfloat pos_colors[] = {
+	//	// vertex coord (X,Y,Z)  // color rgb           // texture (T,S)
+	//	0.0f, -0.5f, -0.5f,      1.0f, 1.0f, 0.0f,		2.f, -1.f,
+	//	0.0f, 0.5f,  -0.5f,      0.0f, 1.0f, 1.0f,		-1.f, -1.f,
+	//	0.0f, -0.5f, 0.5f,       1.0f, 0.0f, 1.0f,		2.f, 2.f,
+	//	0.0f, 0.5f,  0.5f,       1.0f, 0.0f, 0.0f,		-1.f, 2.f
+	//};
+
+	GLfloat pos_coords[] = {
+		// front
+		-1.0f, -1.f, -1.f,   1.f, 0.f,
+		-1.0f,  1.f, -1.f,   0.f, 0.f,
+		-1.0f, -1.f,  1.f,   1.f, 1.f,
+		-1.0f,  1.f,  1.f,   0.f, 1.f,
+		// back
+		 1.0f, -1.f, -1.f,   1.f, 0.f,
+		 1.0f,  1.f, -1.f,   0.f, 0.f,
+		 1.0f, -1.f,  1.f,   1.f, 1.f,
+		 1.0f,  1.f,  1.f,   0.f, 1.f
 	};
 
 	GLuint indices[] = {
-		0, 1, 2, 3, 2, 1
+		0, 1, 2, 3, 2, 1, // front
+		4, 5, 6, 7, 6, 5, // back
+		0, 4, 6, 0, 2, 6, // right
+		1, 5, 3, 3, 7, 5, // left
+		3, 7, 2, 7, 6, 2, // top
+		1, 5, 0, 5, 0, 4  // bottom
 	};
 
 	void generate_circle(unsigned char* data,
@@ -114,19 +133,16 @@ namespace SimpleEngine {
 		#version 460
 
 		layout(location=0) in vec3 vertex_position; 
-		layout(location=1) in vec3 vertex_color;
-		layout(location=2) in vec2 texture_coord;
+		layout(location=1) in vec2 texture_coord;
 
 		uniform mat4 model_mat;
 		uniform mat4 view_proj_mat;
 		uniform int current_frame;
 
-		out vec3 color;
 		out vec2 tex_coord_smile;
 		out vec2 tex_coord_quads;
 
 		void main() {
-			color = vertex_color;
 			tex_coord_smile = texture_coord;
 			tex_coord_quads = texture_coord + vec2(current_frame / 1000.f, current_frame / 1000.f);
 			gl_Position = view_proj_mat * model_mat * vec4(vertex_position, 1.0); 
@@ -136,7 +152,6 @@ namespace SimpleEngine {
 		R"(
 		#version 460
 
-		in vec3 color;
 		in vec2 tex_coord_smile;
 		in vec2 tex_coord_quads;
 		
@@ -146,15 +161,22 @@ namespace SimpleEngine {
 		out vec4 frag_color;
 
 		void main() {
-			//frag_color = vec4(color, 1.0);
 			frag_color = texture(InTexture_Smile, tex_coord_smile) * texture(InTexture_Quads, tex_coord_quads);
 		})";
 
 	float m_background_color[] = { 0, 0, 0, 1 };
 
+	std::array<glm::vec3, 5> positions = {
+			glm::vec3(-2.f, -2.f, -4.f),
+			glm::vec3(-5.f,  0.f,  3.f),
+			glm::vec3(2.f,  1.f, -2.f),
+			glm::vec3(4.f, -3.f,  3.f),
+			glm::vec3(1.f, -7.f,  1.f)
+	};
+
 	std::unique_ptr<ShaderProgram> p_shader_program;
-	std::unique_ptr<VertexBuffer> p_pos_colors_vbo;
-	std::unique_ptr<IndexBuffer> p_index_buffer;
+	std::unique_ptr<VertexBuffer> p_cube_pos_vbo;
+	std::unique_ptr<IndexBuffer> p_cube_index_buffer;
 	std::unique_ptr<VertexArray> p_vao;
 	std::unique_ptr<Texture2D> p_texture_smile;
 	std::unique_ptr<Texture2D> p_texture_quads;
@@ -252,9 +274,8 @@ namespace SimpleEngine {
 		if (!p_shader_program->is_compiled())
 			return false;
 
-		BufferLayout buffer_layout_vec3_vec3_vec2
+		BufferLayout buffer_layout_vec3_vec2
 		{
-			ShaderDataType::Float3,
 			ShaderDataType::Float3,
 			ShaderDataType::Float2
 		};
@@ -262,16 +283,17 @@ namespace SimpleEngine {
 		// NOW we have to PASS our CPU data in shaders 
 		// using VERTEX BUFFER OBJECT to allocate and fill memory on gpu
 		p_vao = std::make_unique<VertexArray>();
-		p_pos_colors_vbo = std::make_unique<VertexBuffer>(pos_colors, sizeof(pos_colors), buffer_layout_vec3_vec3_vec2);
-		p_index_buffer = std::make_unique<IndexBuffer>(indices, sizeof(indices) / sizeof(GLuint));
+		p_cube_pos_vbo = std::make_unique<VertexBuffer>(pos_coords, sizeof(pos_coords), buffer_layout_vec3_vec2);
+		p_cube_index_buffer = std::make_unique<IndexBuffer>(indices, sizeof(indices) / sizeof(GLuint));
 
 		// NEXT BIND data from buffers with our shaders
 		// using VERTEX ARRAY OBJECT
-		p_vao->add_vertex_buffer(*p_pos_colors_vbo);
-		p_vao->set_index_buffer(*p_index_buffer);
+		p_vao->add_vertex_buffer(*p_cube_pos_vbo);
+		p_vao->set_index_buffer(*p_cube_index_buffer);
 		//-----------------------------------------//
 
 		static int current_frame = 0;
+		Renderer_OpenGL::enable_depth_testing();
 		while (!m_bCloseWindow) {
 			Renderer_OpenGL::set_clear_color(
 				m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
@@ -302,7 +324,7 @@ namespace SimpleEngine {
 				translate[0], translate[1], translate[2], 1);
 			glm::mat4 model_mat = translate_mat * rotate_mat * scale_mat;
 			p_shader_program->set_matrix4("model_mat", model_mat);
-			p_shader_program->set_int("current_frame", current_frame++);
+			//p_shader_program->set_int("current_frame", current_frame++);
 
 			camera.set_projection_mode(
 				perspective_camera ?
@@ -310,7 +332,16 @@ namespace SimpleEngine {
 			p_shader_program->set_matrix4("view_proj_mat", camera.get_projection_matrix() * camera.get_view_matrix());
 
 			Renderer_OpenGL::draw(*p_vao);
-
+			// draw cubes
+			for (const glm::vec3& current_pos : positions) {
+				glm::mat4 translate_mat(
+					1, 0, 0, 0,
+					0, 1, 0, 0,
+					0, 0, 1, 0,
+					current_pos[0], current_pos[1], current_pos[2], 1);
+				p_shader_program->set_matrix4("model_mat", translate_mat);
+				Renderer_OpenGL::draw(*p_vao);
+			}
 			//-----------------------------------------//
 			bool show = true;
 			UIModule::ShowExampleAppDockSpace(&show);

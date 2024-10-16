@@ -30,7 +30,15 @@ namespace SimpleEngine {
 	}
 	void Renderer_OpenGL::clear()
 	{
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+	void Renderer_OpenGL::enable_depth_testing()
+	{
+		glEnable(GL_DEPTH_TEST);
+	}
+	void Renderer_OpenGL::disable_depth_testing()
+	{
+		glDisable(GL_DEPTH_TEST);
 	}
 	void Renderer_OpenGL::set_viewport(const unsigned int w, const unsigned int h, const unsigned int left_offset, const unsigned int bottom_offset)
 	{
