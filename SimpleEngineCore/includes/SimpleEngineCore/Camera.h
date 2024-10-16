@@ -29,6 +29,15 @@ namespace SimpleEngine {
 		void set_projection_mode(const ProjectionMode projection_mode);
 		glm::mat4 get_view_matrix();
 		glm::mat4 get_projection_matrix() const { return m_projection_matrix; }
+		void set_far_clip_plane(const float far);
+		void set_near_clip_plane(const float near);
+		void set_viewport_size(const float w, const float h);
+		void set_fov(const float fov);
+
+		const float get_far_clip_plane() const { return m_far_clip_plane; };
+		const float get_near_clip_plane() const { return m_near_clip_plane; };
+		const float get_fov() const { return m_fov; };
+
 		// we gonna move in direction of such vectors not just by xyz
 		void move_forward(const float delta);
 		void move_right(const float delta);
@@ -50,6 +59,14 @@ namespace SimpleEngine {
 		glm::vec3 m_direction;
 		glm::vec3 m_right;
 		glm::vec3 m_up;
+
+		float m_far_clip_plane{ 100.f };
+		float m_near_clip_plane{ 0.1f };
+
+		float m_viewport_width{ 800.0f };
+		float m_viewport_height{ 600.0f };
+
+		float m_fov{ 60.f }; // in degree 
 
 		static constexpr glm::vec3 s_world_up{ 0.f, 0.f, 1.f };
 		static constexpr glm::vec3 s_world_right{ 0.f, -1.f, 0.f };
