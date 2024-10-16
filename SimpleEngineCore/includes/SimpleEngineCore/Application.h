@@ -31,6 +31,7 @@ namespace SimpleEngine {
 		bool perspective_camera = true;
 		Camera camera{ glm::vec3(-5, 0, 0) };
 		bool scroll = false;
+		bool scrollUp = false;
 	private:
 		std::unique_ptr<class Window> m_pWindow;
 

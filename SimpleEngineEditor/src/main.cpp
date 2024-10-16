@@ -67,11 +67,11 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 
 		if (SimpleEngine::Input::IsKeyPressed(SimpleEngine::KeyCode::KEY_LEFT_CONTROL)) {
 			if (scroll) {
-				// todo move back 
-				// check scroll forward back for that
-				int a = 10;
+				if(scrollUp)
+					movment_delta.x += 0.1f;
+				else
+					movment_delta.x -= 0.1f;
 				scroll = false;
-				movment_delta.x += 0.05f;
 			}
 		}
 

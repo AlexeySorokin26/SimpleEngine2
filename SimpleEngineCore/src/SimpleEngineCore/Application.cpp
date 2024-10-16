@@ -217,8 +217,12 @@ namespace SimpleEngine {
 
 		m_event_dispatcher.add_event_listener<EventMouseScroll>(
 			[&](EventMouseScroll& event) {
-				LOG_INFO("[EventMouseScroll]");
+				LOG_INFO("[EventMouseScroll] xoffset{0} and yoffset{1}", event.xoffset, event.yoffset);
 				scroll = true;
+				if (event.yoffset > 0)
+					scrollUp = true;
+				else
+					scrollUp = false;
 			}
 		);
 
