@@ -26,14 +26,15 @@ namespace SimpleEngine {
 		virtual void on_mouse_button_event(const MouseButtonCode button_code, const double x_pos, const double y_pos, const bool pressed) {};
 		glm::vec2 get_current_cursor_pos() const;
 
-		float camera_pos[3] = { 0.f, 0.f, 1.f };
-		float camera_rotation[3] = { 0.f, 0.f, 0.f };
-		float camera_fov = 60.f;
-		float camera_near_plane = 0.1f;
-		float camera_far_plane = 100.f;
-
-		bool perspective_camera = true;
 		Camera camera{ glm::vec3(-5, 0, 0) };
+
+		float light_source_pos[3] = { 0.f, 0.f, 1.f };
+		float light_source_color[3] = { 1.f, 1.f, 1.f };
+		float ambient_factor = { 0.1f};
+		float diffuse_factor = { 1.0f};
+		float specular_factor = { 0.5f};
+		float shininess = { 32.f};
+
 		bool scroll = false;
 		bool scrollUp = false;
 	private:

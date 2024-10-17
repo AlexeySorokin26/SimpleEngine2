@@ -117,4 +117,12 @@ namespace SimpleEngine {
 	void ShaderProgram::set_int(const char* name, const int value) const {
 		glUniform1i(glGetUniformLocation(m_id, name), value);
 	}
+	void ShaderProgram::set_float(const char* name, const float value) const
+	{
+		glUniform1f(glGetUniformLocation(m_id, name), value);
+	}
+	void ShaderProgram::set_vec3(const char* name, const glm::vec3& v) const
+	{
+		glUniform3f(glGetUniformLocation(m_id, name), v.x, v.y, v.z);
+	}
 }

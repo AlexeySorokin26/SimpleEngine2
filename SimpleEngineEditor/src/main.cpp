@@ -168,6 +168,13 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 
 		ImGui::Begin("Editor");
 		// if we change value
+		ImGui::SliderFloat3("Light source pos", light_source_pos, -10.f, 10.f);
+		ImGui::ColorEdit3("Light source color", light_source_color);
+		ImGui::SliderFloat("Ambient factor", &ambient_factor, 0.1f, 1.f);
+		ImGui::SliderFloat("Diffuse factor", &diffuse_factor, 0.1f, 1.f);
+		ImGui::SliderFloat("Specular factor", &specular_factor, 0.1f, 1.f);
+		ImGui::SliderFloat("Shininessr", &shininess, 1.f, 128.f);
+
 		if (ImGui::SliderFloat3("Cam pos", camera_pos, -10.f, 10.f)) {
 			camera.set_position(glm::vec3(camera_pos[0], camera_pos[1], camera_pos[2]));
 		}
@@ -192,6 +199,14 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 	double m_initial_mouse_pos_x = 0.0;
 	double m_initial_mouse_pos_y = 0.0;
 	int frame = 0;
+
+	float camera_pos[3] = { 0.f, 0.f, 1.f };
+	float camera_rotation[3] = { 0.f, 0.f, 0.f };
+	float camera_fov = 60.f;
+	float camera_near_plane = 0.1f;
+	float camera_far_plane = 100.f;
+
+	bool perspective_camera = true;
 };
 
 
