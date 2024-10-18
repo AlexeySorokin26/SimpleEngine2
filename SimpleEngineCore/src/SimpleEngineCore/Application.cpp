@@ -157,23 +157,23 @@ namespace SimpleEngine {
 		layout(location=1) in vec3 vertex_normal; 
 		layout(location=2) in vec2 texture_coord;
 
-		uniform mat4 model_mat;
-		uniform mat4 view_proj_mat;
+		uniform mat4 model_view_mat; // go into camera space
+		uniform mat4 mvp_mat; // model * view * proj mat
+		uniform mat3 normal_matrix;	// mat for normal; it has to be slightly different from our mv matrix because of transforamtion of space and normals should be transformed a bit differently from 38 lecture SimpleCoding 	 
 		uniform int current_frame;
 
 		out vec2 tex_coord_smile;
 		out vec2 tex_coord_quads;
-		out vec3 frag_normal;
-		out vec3 frag_pos;
+		out vec3 frag_normal_eye; // in camera space
+		out vec3 frag_pos_eye; // in camera space
 
 		void main() {
-			frag_normal = mat3(transpose(inverse(model_mat))) * vertex_normal;
 			tex_coord_smile = texture_coord;
 			tex_coord_quads = texture_coord + vec2(current_frame / 1000.f, current_frame / 1000.f);
 			
-			vec4 vertex_pos_world = model_mat * vec4(vertex_position, 1.0); 
-			frag_pos = vec3(vertex_pos_world.x, vertex_pos_world.y, vertex_pos_world.z);
-			gl_Position = view_proj_mat * vertex_pos_world; 
+			frag_normal_eye = normal_matrix * vertex_normal;
+			frag_pos_eye = vec3(model_view_mat * vec4(vertex_position, 1.0));
+			gl_Position = mvp_mat * vec4(vertex_position, 1.0);
 		})";
 
 	const char* frag_shader =
@@ -182,15 +182,14 @@ namespace SimpleEngine {
 
 		in vec2 tex_coord_smile;
 		in vec2 tex_coord_quads;
-		in vec3 frag_pos;
-		in vec3 frag_normal;
+		in vec3 frag_pos_eye; // now we got data in cam space 
+		in vec3 frag_normal_eye;
 		
 		layout(binding=0) uniform sampler2D InTexture_Smile;
 		layout(binding=1) uniform sampler2D InTexture_Quads;
 
-		uniform vec3 cam_pos;
 		uniform vec3 light_color;
-		uniform vec3 light_pos;
+		uniform vec3 light_pos_eye;
 		uniform float ambient_factor;
 		uniform float diffuse_factor;
 		uniform float specular_factor;
@@ -205,12 +204,12 @@ namespace SimpleEngine {
 			vec3 ambient = ambient_factor * light_color;
 			
 			// diffuse
-			vec3 normal = normalize(frag_normal);
-			vec3 light_direction = normalize(light_pos-frag_pos);
+			vec3 normal = normalize(frag_normal_eye);
+			vec3 light_direction = normalize(light_pos_eye-frag_pos_eye);
 			vec3 diffuse = diffuse_factor * light_color * max(dot(normal, light_direction), 0);
 			
 			// specular 
-			vec3 view_dir = normalize(cam_pos - frag_pos); // vector to cam
+			vec3 view_dir = normalize(-frag_pos_eye); // vector to cam
 			vec3 reflect_dir = reflect(-light_direction, normal);
 			vec3 specular = specular_factor * light_color * pow(max(dot(view_dir, reflect_dir), 0), shininess);
 	
@@ -225,11 +224,10 @@ namespace SimpleEngine {
 		layout(location=1) in vec3 vertex_normal; 
 		layout(location=2) in vec2 texture_coord;
 
-		uniform mat4 model_mat;
-		uniform mat4 view_proj_mat;
+		uniform mat4 mvp_mat;
 
 		void main() {
-			gl_Position = view_proj_mat * model_mat * vec4(vertex_position * 0.1f, 1.0); 
+			gl_Position = mvp_mat * vec4(vertex_position * 0.1f, 1.0); 
 		})";
 
 	const char* light_source_frag_shader =
@@ -280,7 +278,8 @@ namespace SimpleEngine {
 		m_event_dispatcher.add_event_listener<EventWindowResize>(
 			[&](EventWindowResize& event) {
 				LOG_INFO("[WindowResized] Window resized to {0}x{1}", event.w, event.h);
-				camera.set_viewport_size(event.w, event.h);
+				camera.set_viewport_size(static_cast<float>(event.w), static_cast<float>(event.h));
+
 				draw();
 			}
 		);
@@ -347,8 +346,6 @@ namespace SimpleEngine {
 
 		delete[] data;
 
-		// Should go from this file  
-		//-----------------------------------------//
 		// First we create shader programms
 		p_shader_program = std::make_unique<ShaderProgram>(vertex_shader, frag_shader);
 		if (!p_shader_program->is_compiled())
@@ -398,35 +395,16 @@ namespace SimpleEngine {
 
 		p_shader_program->bind();
 
-		//glm::mat4 scale_mat(
-		//	scale[0], 0, 0, 0,
-		//	0, scale[1], 0, 0,
-		//	0, 0, scale[2], 0,
-		//	0, 0, 0, 1);
+		p_shader_program->set_vec3("light_color",
+			glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2])
+		);
+		p_shader_program->set_vec3("light_pos_eye",
+			glm::vec3(
+				camera.get_view_matrix() *
+				glm::vec4(light_source_pos[0], light_source_pos[1], light_source_pos[2], 1.f)
+			)
+		);
 
-		//float rotate_in_rad = glm::radians(rotate);
-		//// here its colum major so turned a bit 
-		//glm::mat4 rotate_mat(
-		//	cos(rotate_in_rad), sin(rotate_in_rad), 0, 0,
-		//	-sin(rotate_in_rad), cos(rotate_in_rad), 0, 0,
-		//	0, 0, 1, 0,
-		//	0, 0, 0, 1);
-
-		//glm::mat4 translate_mat(
-		//	1, 0, 0, 0,
-		//	0, 1, 0, 0,
-		//	0, 0, 1, 0,
-		//	translate[0], translate[1], translate[2], 1);
-		//glm::mat4 model_mat = translate_mat * rotate_mat * scale_mat;
-		//p_shader_program->set_matrix4("model_mat", model_mat);
-
-		//static int current_frame = 0;
-		//p_shader_program->set_int("current_frame", current_frame++);
-
-		p_shader_program->set_matrix4("view_proj_mat", camera.get_projection_matrix() * camera.get_view_matrix());
-		p_shader_program->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
-		p_shader_program->set_vec3("light_pos", glm::vec3(light_source_pos[0], light_source_pos[1], light_source_pos[2]));
-		p_shader_program->set_vec3("cam_pos", camera.get_camera_pos());
 		p_shader_program->set_float("ambient_factor", ambient_factor);
 		p_shader_program->set_float("diffuse_factor", diffuse_factor);
 		p_shader_program->set_float("specular_factor", specular_factor);
@@ -439,20 +417,24 @@ namespace SimpleEngine {
 				0, 1, 0, 0,
 				0, 0, 1, 0,
 				current_pos[0], current_pos[1], current_pos[2], 1);
-			p_shader_program->set_matrix4("model_mat", translate_mat);
+			const glm::mat4 model_view_mat = camera.get_view_matrix() * translate_mat;
+			p_shader_program->set_matrix4("model_view_mat", model_view_mat);
+			p_shader_program->set_matrix4("mvp_mat", camera.get_projection_matrix() * model_view_mat);
+			p_shader_program->set_matrix3("normal_matrix",
+				glm::transpose(glm::inverse(model_view_mat))
+			);
 			Renderer_OpenGL::draw(*p_cube_vao);
 		}
 
 		// set light source pos and color
 		{
 			p_light_source_shader_program->bind();
-			p_light_source_shader_program->set_matrix4("view_proj_mat", camera.get_projection_matrix() * camera.get_view_matrix());
 			glm::mat4 translate_mat(
 				1, 0, 0, 0,
 				0, 1, 0, 0,
 				0, 0, 1, 0,
 				light_source_pos[0], light_source_pos[1], light_source_pos[2], 1);
-			p_light_source_shader_program->set_matrix4("model_mat", translate_mat);
+			p_light_source_shader_program->set_matrix4("mvp_mat", camera.get_projection_matrix() * camera.get_view_matrix() * translate_mat);
 			p_light_source_shader_program->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
 			Renderer_OpenGL::draw(*p_cube_vao);
 		}
