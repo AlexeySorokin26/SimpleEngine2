@@ -543,15 +543,15 @@ namespace SimpleEngine {
 			// Draw world coordinate system in top-right corner
 			{
 				// Create an orthographic projection matrix
-				glm::mat4 ortho_proj = glm::ortho(0.0f, window_width, 0.0f, window_height, camera.get_near_clip_plane(), camera.get_far_clip_plane());
+				glm::mat4 ortho_proj = glm::ortho(0.0f, window_width, 0.0f, window_height, -1.0f, 1.0f);
 
 				// Define the size and position of the axes
-				float axes_length = 50.0f;  // Length of each axis in pixels
-				float padding = 10.0f;      // Padding from the window edges
+				float axes_length = 100.0f;  // Length of each axis in pixels
+				float padding = 50.0f;      // Padding from the window edges
 
 				// Create a model matrix to position the axes in the top-right corner
 				glm::mat4 model = glm::mat4(1.0f);
-				//model = glm::translate(model, glm::vec3(window_width - axes_length - padding, window_height - axes_length - padding, 0.0f));
+				model = glm::translate(model, glm::vec3(window_width - axes_length - padding, window_height - axes_length - padding, 0.0f));
 				model = glm::scale(model, glm::vec3(axes_length, axes_length, 1.0f));
 
 				// Compute the MVP matrix for the axes
