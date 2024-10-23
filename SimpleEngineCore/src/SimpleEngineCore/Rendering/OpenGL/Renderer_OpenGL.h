@@ -11,6 +11,7 @@ namespace SimpleEngine {
 		static bool init(GLFWwindow* pWindow);
 
 		static void draw(const VertexArray& v_arr);
+		static void draw_arrays(const VertexArray& v_arr);
 		static void set_clear_color(const float r, const float g, const float b, const float a);
 		static void clear();
 		static void enable_depth_testing();

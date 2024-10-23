@@ -27,7 +27,7 @@ namespace SimpleEngine {
 		void set_rotation(const glm::vec3& rotation);
 		void set_position_rotation(const glm::vec3& position, const glm::vec3& rotation);
 		void set_projection_mode(const ProjectionMode projection_mode);
-		glm::mat4 get_view_matrix();
+		glm::mat4 get_updated_view_matrix();
 		glm::mat4 get_projection_matrix() const { return m_projection_matrix; }
 		void set_far_clip_plane(const float far);
 		void set_near_clip_plane(const float near);

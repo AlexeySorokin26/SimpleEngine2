@@ -86,8 +86,9 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 				camera.move_right(static_cast<float>(current_cursor_pos.x - m_initial_mouse_pos_x) / 100.f);
 				camera.move_up((static_cast<float>(m_initial_mouse_pos_y) - current_cursor_pos.y) / 100.f);
 			}
-			// if only right then just rotate in x and y
+			// if only right then just rotate in z and y
 			else {
+				// mouse have only x and y pos from screen but we want to rotate in z and y
 				rotation_delta.z += (static_cast<float>(m_initial_mouse_pos_x) - current_cursor_pos.x) / 5.f; // to not to fast devide by 5
 				rotation_delta.y -= (static_cast<float>(m_initial_mouse_pos_y) - current_cursor_pos.y) / 5.f; // to not to fast devide by 5
 

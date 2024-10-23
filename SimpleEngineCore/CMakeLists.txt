@@ -20,6 +20,7 @@ set(ENGINE_PRIVATE_INCLUDES
 	src/SimpleEngineCore/Rendering/OpenGL/IndexBuffer.h
 	src/SimpleEngineCore/Rendering/OpenGL/Renderer_OpenGL.h
 	src/SimpleEngineCore/Rendering/OpenGL/Texture2D.h
+	src/SimpleEngineCore/Rendering/OpenGL/Mesh.h
 )
 
 set(ENGINE_PRIVATE_SOURCES
@@ -35,6 +36,7 @@ set(ENGINE_PRIVATE_SOURCES
 	src/SimpleEngineCore/Rendering/OpenGL/IndexBuffer.cpp
 	src/SimpleEngineCore/Rendering/OpenGL/Renderer_OpenGL.cpp
 	src/SimpleEngineCore/Rendering/OpenGL/Texture2D.cpp
+	src/SimpleEngineCore/Rendering/OpenGL/Mesh.cpp
 )
 
 set(ENGINE_ALL_SOURCES

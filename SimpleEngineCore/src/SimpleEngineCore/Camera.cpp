@@ -14,7 +14,7 @@ namespace SimpleEngine {
 		update_view_matrix();
 		update_projection_matrix();
 	}
-	glm::mat4 Camera::get_view_matrix()
+	glm::mat4 Camera::get_updated_view_matrix()
 	{
 		if (m_update_view_matrix) {
 			update_view_matrix();

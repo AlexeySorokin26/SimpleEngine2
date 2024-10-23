@@ -102,7 +102,16 @@ namespace SimpleEngine {
 	{
 		v_arr.bind();
 		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(v_arr.get_indices_count()), GL_UNSIGNED_INT, nullptr);
-
+		v_arr.unbind();
+	}
+	void Renderer_OpenGL::draw_arrays(const VertexArray& v_arr)
+	{
+		v_arr.bind();
+		//LOG_INFO("draw_arrays Info indices count: {0}",
+		//	v_arr.get_indices_count()
+		//);
+		glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(v_arr.get_indices_count())); 
+		v_arr.unbind();
 	}
 	void Renderer_OpenGL::set_clear_color(const float r, const float g, const float b, const float a)
 	{
