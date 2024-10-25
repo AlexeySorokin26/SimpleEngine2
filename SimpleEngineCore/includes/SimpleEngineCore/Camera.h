@@ -32,6 +32,8 @@ namespace SimpleEngine {
 		void set_far_clip_plane(const float far);
 		void set_near_clip_plane(const float near);
 		void set_viewport_size(const float w, const float h);
+		float get_viewport_w() const { return m_viewport_width; };
+		float get_viewport_h() const { return m_viewport_height; };
 		void set_fov(const float fov);
 
 		const float get_far_clip_plane() const { return m_far_clip_plane; };

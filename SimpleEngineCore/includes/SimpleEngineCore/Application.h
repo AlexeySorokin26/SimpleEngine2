@@ -35,6 +35,7 @@ namespace SimpleEngine {
 		float diffuse_factor = { 1.0f };
 		float specular_factor = { 0.5f };
 		float shininess = { 32.f };
+		float scale_factor = { 1.f };
 
 		bool scroll = false;
 		bool scrollUp = false;

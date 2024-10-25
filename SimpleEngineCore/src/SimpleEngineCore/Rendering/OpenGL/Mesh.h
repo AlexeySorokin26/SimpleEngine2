@@ -285,7 +285,7 @@ namespace SimpleEngine {
 			delete[] data;
 		}
 
-		void draw(Camera& camera, const float light_source_color[3], const float light_source_pos[3]) {
+		void draw(Camera& camera, const float light_source_color[3], const float light_source_pos[3], const float scale_factor) {
 			p_shader_program->bind();
 
 			p_shader_program->set_vec3("light_color",
@@ -305,13 +305,15 @@ namespace SimpleEngine {
 
 			// draw cubes
 			{
+				glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), glm::vec3(scale_factor));
 				for (const glm::vec3& current_pos : positions) {
 					glm::mat4 translate_mat(
 						1, 0, 0, 0,
 						0, 1, 0, 0,
 						0, 0, 1, 0,
 						current_pos[0], current_pos[1], current_pos[2], 1);
-					const glm::mat4 model_view_mat = camera.get_updated_view_matrix() * translate_mat;
+
+					const glm::mat4 model_view_mat = camera.get_updated_view_matrix() * translate_mat * scale_mat;
 					p_shader_program->set_matrix4("model_view_mat", model_view_mat);
 					p_shader_program->set_matrix4("mvp_mat", camera.get_projection_matrix() * model_view_mat);
 					p_shader_program->set_matrix3("normal_matrix",
@@ -331,13 +333,15 @@ namespace SimpleEngine {
 		std::unique_ptr<Texture2D> p_texture_smile;
 		std::unique_ptr<Texture2D> p_texture_quads;
 
-		std::array<glm::vec3, 5> positions = {
+		std::array<glm::vec3, 1> positions = {
+		glm::vec3(0.f, 0.f, 0.f) };
+		/*std::array<glm::vec3, 5> positions = {
 		glm::vec3(-2.f, -2.f, -4.f),
 		glm::vec3(-5.f,  0.f,  3.f),
 		glm::vec3(2.f,  1.f, -2.f),
 		glm::vec3(4.f, -3.f,  3.f),
 		glm::vec3(1.f, -7.f,  1.f)
-		};
+		};*/
 	};
 
 
@@ -451,8 +455,10 @@ namespace SimpleEngine {
 					0, 1, 0, 0,
 					0, 0, 1, 0,
 					light_source_pos[0], light_source_pos[1], light_source_pos[2], 1);
-				p_shader_program->set_matrix4("mvp_mat", camera.get_projection_matrix() * camera.get_updated_view_matrix() * translate_mat);
-				p_shader_program->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+				p_shader_program->set_matrix4("mvp_mat",
+					camera.get_projection_matrix() * camera.get_updated_view_matrix() * translate_mat);
+				p_shader_program->set_vec3("light_color",
+					glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
 				Renderer_OpenGL::draw(*p_vao);
 			}
 		}
@@ -537,39 +543,85 @@ namespace SimpleEngine {
 			}
 		}
 
-		void draw(Camera& camera, float window_width, float window_height) {
+		//void draw(Camera& camera, float windowWidth, float windowHeight) {
+		//	// Включаем шейдерную программу
+		//	p_shader_program->bind();
+
+		//	// Отключаем тест глубины, чтобы оси всегда были на экране
+		//	Renderer_OpenGL::disable_depth_testing();
+
+		//	// Задаем длину осей
+		//	float axes_length = 50.0f; // Размер в пикселях, подберите значение
+
+		//	// Ортографическая проекция для экранных координат (2D)
+		//	glm::mat4 proj_mat = glm::ortho(0.0f, windowWidth, 0.0f, windowHeight);
+
+		//	// Модельная матрица для позиционирования осей в верхнем правом углу
+		//	glm::mat4 model = glm::mat4(1.0f);
+		//	model = glm::translate(model, glm::vec3(windowWidth - 70.0f, windowHeight - 70.0f, 0.0f)); // Смещение осей
+		//	model = glm::scale(model, glm::vec3(axes_length, axes_length, axes_length)); // Масштаб осей
+
+		//	// Нет необходимости в матрице вида (view matrix), оси будут отображаться на экране
+		//	glm::mat4 view_mat = glm::mat4(1.0f);
+
+		//	// Вычисляем итоговую матрицу MVP
+		//	glm::mat4 mvp = proj_mat * view_mat * model;
+
+		//	// Устанавливаем матрицу MVP в шейдер
+		//	p_shader_program->set_matrix4("mvp_mat", mvp);
+
+		//	// Рисуем оси
+		//	Renderer_OpenGL::draw_arrays(*p_vao);
+
+		//	// Включаем тест глубины обратно
+		//	Renderer_OpenGL::enable_depth_testing();
+		//}
+
+		void draw(Camera& camera, float windowWidth, float windowHeight) {
+			// Включаем шейдерную программу
 			p_shader_program->bind();
 
-			// Draw world coordinate system in top-right corner
-			{
-				// Create an orthographic projection matrix
-				glm::mat4 ortho_proj = glm::ortho(0.0f, window_width, 0.0f, window_height, -1.0f, 1.0f);
+			// Отключаем тест глубины, чтобы оси всегда были видны
+			Renderer_OpenGL::disable_depth_testing();
 
-				// Define the size and position of the axes
-				float axes_length = 100.0f;  // Length of each axis in pixels
-				float padding = 50.0f;      // Padding from the window edges
+			// Размер осей на экране
+			float axes_length = 50.0f;
 
-				// Create a model matrix to position the axes in the top-right corner
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, glm::vec3(window_width - axes_length - padding, window_height - axes_length - padding, 0.0f));
-				model = glm::scale(model, glm::vec3(axes_length, axes_length, 1.0f));
+			// Ортографическая проекция для фиксированного положения осей на экране
+			glm::mat4 ortho_proj = glm::ortho(0.0f, windowWidth, 0.0f, windowHeight);
 
-				// Compute the MVP matrix for the axes
-				glm::mat4 mvp = ortho_proj * model;
+			// Модельная матрица для смещения осей в правый верхний угол
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(windowWidth - 70.0f, windowHeight - 70.0f, 0.0f));
+			model = glm::scale(model, glm::vec3(axes_length, axes_length, axes_length));
 
-				// Set the MVP matrix uniform
-				p_shader_program->set_matrix4("mvp_mat", mvp);
+			// Вытаскиваем только поворот камеры (без трансляции)
+			glm::mat4 view_rotation = glm::mat4(glm::mat3(camera.get_updated_view_matrix()));
 
-				// Disable depth testing to ensure axes are drawn on top
-				Renderer_OpenGL::disable_depth_testing();
+			// Итоговая матрица MVP
+			glm::mat4 mvp = ortho_proj * model * view_rotation;
 
-				// Bind the VAO and draw the axes as lines
-				Renderer_OpenGL::draw_arrays(*p_vao);
+			// Устанавливаем матрицу MVP в шейдер
+			p_shader_program->set_matrix4("mvp_mat", mvp);
 
-				// Re-enable depth testing
-				Renderer_OpenGL::enable_depth_testing();
-			}
+			// Рисуем оси
+			Renderer_OpenGL::draw_arrays(*p_vao);
+
+			// Включаем обратно тест глубины
+			Renderer_OpenGL::enable_depth_testing();
 		}
+
+
+
+
+
+
+
+
+
+
+
+
 	private:
 		std::unique_ptr<ShaderProgram> p_shader_program;
 		std::unique_ptr<VertexArray> p_vao;

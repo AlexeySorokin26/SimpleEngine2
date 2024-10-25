@@ -121,9 +121,9 @@ namespace SimpleEngine {
 			m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
 		Renderer_OpenGL::clear();
 
-		cube->draw(camera, light_source_color, light_source_pos);
+		cube->draw(camera, light_source_color, light_source_pos, scale_factor);
 		lightCube->draw(camera, light_source_color, light_source_pos);
-		worldCoordinateSystem->draw(camera, static_cast<float>(m_pWindow->get_width()), static_cast<float>(m_pWindow->get_height()));
+		worldCoordinateSystem->draw(camera, m_pWindow->get_width(), m_pWindow->get_height());
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

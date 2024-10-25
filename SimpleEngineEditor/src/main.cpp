@@ -175,6 +175,7 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 		ImGui::SliderFloat("Diffuse factor", &diffuse_factor, 0.1f, 1.f);
 		ImGui::SliderFloat("Specular factor", &specular_factor, 0.1f, 1.f);
 		ImGui::SliderFloat("Shininessr", &shininess, 1.f, 128.f);
+		ImGui::SliderFloat("Cube scale", &scale_factor, 0.001f, 100.f);
 
 		if (ImGui::SliderFloat3("Cam pos", camera_pos, -10.f, 10.f)) {
 			camera.set_position(glm::vec3(camera_pos[0], camera_pos[1], camera_pos[2]));
@@ -194,6 +195,7 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 		if (ImGui::SliderFloat("Cam far clip plane", &camera_far_plane, 1.f, 100.f)) {
 			camera.set_far_clip_plane(camera_far_plane);
 		}
+		
 		ImGui::End();
 	}
 
