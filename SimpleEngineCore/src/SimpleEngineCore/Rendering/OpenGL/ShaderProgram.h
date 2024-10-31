@@ -2,11 +2,14 @@
 
 #include <glm/mat4x4.hpp>
 
+#include <string>
+
+
 namespace SimpleEngine {
 
 	class ShaderProgram {
 	public:
-		ShaderProgram(const char* vertex_shader_src, const char* frag_shader_src);
+		ShaderProgram(const std::string& file_vertex_shader, const std::string& file_frag_shader);
 		ShaderProgram(ShaderProgram&&);
 		ShaderProgram& operator=(ShaderProgram&&);
 		~ShaderProgram();
@@ -14,6 +17,8 @@ namespace SimpleEngine {
 		ShaderProgram() = delete; // we need some text to start work without no sense 
 		ShaderProgram(const ShaderProgram& shaderProgram) = delete;
 		ShaderProgram& operator=(const ShaderProgram& shaderProgram) = delete;
+
+		std::string ReadFile(const std::string& fileLocation);
 
 		void bind() const;
 		static void unbind();

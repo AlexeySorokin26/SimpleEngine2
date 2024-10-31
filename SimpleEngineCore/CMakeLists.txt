@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 set(PROJECT_NAME SimpleEngineCore)
 
+# Define shader files
+set(SHADER_FILES
+    shaders/cube_vertex_shader.glsl
+    shaders/cube_fragment_shader.glsl
+    shaders/light_cube_vertex_shader.glsl
+    shaders/light_cube_fragment_shader.glsl
+)
+
 set(ENGINE_PUBLIC_INCLUDES
 	includes/SimpleEngineCore/Application.h	
 	includes/SimpleEngineCore/Log.h	
@@ -43,6 +51,7 @@ set(ENGINE_ALL_SOURCES
 	${ENGINE_PUBLIC_INCLUDES}	
 	${ENGINE_PRIVATE_INCLUDES}	
 	${ENGINE_PRIVATE_SOURCES}	
+	${SHADER_FILES}
 )
 
 add_library(
@@ -52,8 +61,12 @@ add_library(
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES
-	${ENGINE_ALL_SOURCES}
+	${ENGINE_PUBLIC_INCLUDES}
+    ${ENGINE_PRIVATE_INCLUDES}
+    ${ENGINE_PRIVATE_SOURCES}
 )
+
+source_group("Shaders" FILES ${SHADER_FILES})
 
 target_include_directories(
 	${PROJECT_NAME} 

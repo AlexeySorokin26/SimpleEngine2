@@ -214,9 +214,18 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 
 
 int main() {
-	auto myApp = std::make_unique<SimpleEngineEditor>();
 
-	int returnCode = myApp->start(2048, 2048, "My first app");
+	int returnCode = 0;
+	try
+	{
+		auto myApp = std::make_unique<SimpleEngineEditor>();
+
+		returnCode = myApp->start(2048, 2048, "My first app");
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+	}
 
 	return returnCode;
 }

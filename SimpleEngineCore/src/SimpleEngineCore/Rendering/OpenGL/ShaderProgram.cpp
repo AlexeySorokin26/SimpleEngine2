@@ -8,6 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <string>
+#include <fstream>
+#include <sstream>
 
 namespace SimpleEngine {
 	bool create_shader(const char* source, const GLenum shader_type, GLuint& shader_id) {
@@ -26,17 +28,18 @@ namespace SimpleEngine {
 		}
 		return true;
 	}
-	ShaderProgram::ShaderProgram(const char* vertex_shader_src, const char* frag_shader_src)
+
+	ShaderProgram::ShaderProgram(const std::string& file_vertex_shader, const std::string& file_frag_shader)
 	{
 		GLuint vertex_shader_id = 0;
-		if (!create_shader(vertex_shader_src, GL_VERTEX_SHADER, vertex_shader_id)) {
+		if (!create_shader(ReadFile(file_vertex_shader).c_str(), GL_VERTEX_SHADER, vertex_shader_id)) {
 			LOG_CRIT("Vertex shader: compile-time error!");
 			glDeleteShader(vertex_shader_id);
 			return;
 		}
 
 		GLuint frag_shader_id = 0;
-		if (!create_shader(frag_shader_src, GL_FRAGMENT_SHADER, frag_shader_id)) {
+		if (!create_shader(ReadFile(file_frag_shader).c_str(), GL_FRAGMENT_SHADER, frag_shader_id)) {
 			LOG_CRIT("Frag shader: compile-time error!");
 			glDeleteShader(vertex_shader_id);
 			glDeleteShader(frag_shader_id);
@@ -95,6 +98,24 @@ namespace SimpleEngine {
 	ShaderProgram::~ShaderProgram()
 	{
 		glDeleteProgram(m_id);
+	}
+
+	std::string ShaderProgram::ReadFile(const std::string& fileLocation)
+	{
+		// TODO using file is bad practice because of raii
+		std::ifstream file(fileLocation);
+		if (!file.is_open()) {
+			std::string msg = "File open failed " + std::string(fileLocation);
+			throw std::exception(msg.c_str());
+		}
+
+		std::stringstream stream;
+		std::string str;
+		while (std::getline(file, str)) {
+			stream << str << '\n';;
+		}
+		file.close();
+		return stream.str();
 	}
 
 	void ShaderProgram::bind() const
