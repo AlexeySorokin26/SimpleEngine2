@@ -24,6 +24,7 @@ namespace SimpleEngine {
 			const glm::vec3& rotation = { 0, 0, 0 },
 			const ProjectionMode projection_mode = ProjectionMode::Perspective);
 		void set_position(const glm::vec3& position);
+		glm::vec3 get_position() const { return m_position; }
 		void set_rotation(const glm::vec3& rotation);
 		void set_position_rotation(const glm::vec3& position, const glm::vec3& rotation);
 		void set_projection_mode(const ProjectionMode projection_mode);
