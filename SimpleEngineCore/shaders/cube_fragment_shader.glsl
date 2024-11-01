@@ -5,7 +5,6 @@ in vec3 frag_pos_eye; // now we got data in cam space
 in vec3 frag_normal_eye;
 
 layout(binding = 0) uniform sampler2D InTexture_Smile;
-layout(binding = 1) uniform sampler2D InTexture_Quads;
 
 uniform vec3 light_color;
 uniform vec3 light_pos_eye;

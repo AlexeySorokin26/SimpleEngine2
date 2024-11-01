@@ -6,8 +6,12 @@ set(PROJECT_NAME SimpleEngineCore)
 set(SHADER_FILES
     shaders/cube_vertex_shader.glsl
     shaders/cube_fragment_shader.glsl
-    shaders/light_cube_vertex_shader.glsl
+    
+	shaders/light_cube_vertex_shader.glsl
     shaders/light_cube_fragment_shader.glsl
+
+    shaders/ground_cube_fragment_shader.glsl
+    shaders/ground_cube_vertex_shader.glsl
 )
 
 set(ENGINE_PUBLIC_INCLUDES

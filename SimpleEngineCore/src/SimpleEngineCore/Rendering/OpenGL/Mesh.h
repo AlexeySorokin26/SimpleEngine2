@@ -237,15 +237,15 @@ namespace SimpleEngine {
 		std::unique_ptr<IndexBuffer> p_index_buffer;
 		std::unique_ptr<Texture2D> p_texture_smile;
 
-		std::array<glm::vec3, 1> positions = {
-		glm::vec3(0.f, 0.f, 0.f) };
-		/*std::array<glm::vec3, 5> positions = {
-		glm::vec3(-2.f, -2.f, -4.f),
-		glm::vec3(-5.f,  0.f,  3.f),
-		glm::vec3(2.f,  1.f, -2.f),
-		glm::vec3(4.f, -3.f,  3.f),
-		glm::vec3(1.f, -7.f,  1.f)
-		};*/
+		//std::array<glm::vec3, 1> positions = {
+		//glm::vec3(0.f, 0.f, 0.f) };
+		std::array<glm::vec3, 5> positions = {
+			glm::vec3(-2.f, -2.f, -4.f),
+			glm::vec3(-5.f,  0.f,  3.f),
+			glm::vec3(2.f,  1.f, -2.f),
+			glm::vec3(4.f, -3.f,  3.f),
+			glm::vec3(1.f, -7.f,  1.f)
+		};
 	};
 
 
@@ -350,5 +350,109 @@ namespace SimpleEngine {
 		std::unique_ptr<VertexArray> p_vao;
 		std::unique_ptr<VertexBuffer> p_vbo;
 		std::unique_ptr<IndexBuffer> p_index_buffer;
+	};
+
+	class GroundCube {
+	public:
+		GroundCube()
+		{
+			GLfloat vertices[] = {
+				//    position             normal            UV                  index
+				// FRONT
+				-1.0f, -1.f, -1.f,    -1.f,  0.f,  0.f,     0.f, 0.f,              // 0
+				-1.0f,  1.f, -1.f,    -1.f,  0.f,  0.f,     1.f, 0.f,              // 1
+				-1.0f,  1.f,  1.f,    -1.f,  0.f,  0.f,     1.f, 1.f,              // 2
+				-1.0f, -1.f,  1.f,    -1.f,  0.f,  0.f,     0.f, 1.f,              // 3
+				// BACK                                  
+				 1.0f, -1.f, -1.f,     1.f,  0.f,  0.f,     1.f, 0.f,              // 4
+				 1.0f,  1.f, -1.f,     1.f,  0.f,  0.f,     0.f, 0.f,              // 5
+				 1.0f,  1.f,  1.f,     1.f,  0.f,  0.f,     0.f, 1.f,              // 6
+				 1.0f, -1.f,  1.f,     1.f,  0.f,  0.f,     1.f, 1.f,              // 7
+				 // RIGHT
+				 -1.0f,  1.f, -1.f,     0.f,  1.f,  0.f,     0.f, 0.f,              // 8
+				  1.0f,  1.f, -1.f,     0.f,  1.f,  0.f,     1.f, 0.f,              // 9
+				  1.0f,  1.f,  1.f,     0.f,  1.f,  0.f,     1.f, 1.f,              // 10
+				 -1.0f,  1.f,  1.f,     0.f,  1.f,  0.f,     0.f, 1.f,              // 11
+				 // LEFT
+				 -1.0f, -1.f, -1.f,     0.f, -1.f,  0.f,     1.f, 0.f,              // 12
+				  1.0f, -1.f, -1.f,     0.f, -1.f,  0.f,     0.f, 0.f,              // 13
+				  1.0f, -1.f,  1.f,     0.f, -1.f,  0.f,     0.f, 1.f,              // 14
+				 -1.0f, -1.f,  1.f,     0.f, -1.f,  0.f,     1.f, 1.f,              // 15
+				 // TOP
+				 -1.0f, -1.f,  1.f,     0.f,  0.f,  1.f,     0.f, 0.f,              // 16
+				 -1.0f,  1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 0.f,              // 17
+				  1.0f,  1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 1.f,              // 18
+				  1.0f, -1.f,  1.f,     0.f,  0.f,  1.f,     0.f, 1.f,              // 19
+				  // BOTTOM
+				  -1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 1.f,              // 20
+				  -1.0f,  1.f, -1.f,    0.f,  0.f, -1.f,     1.f, 1.f,              // 21
+				   1.0f,  1.f, -1.f,    0.f,  0.f, -1.f,     1.f, 0.f,              // 22
+				   1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 0.f,              // 23
+			};
+
+			GLuint indices[] = {
+				0,   1,  2,  2,  3,  0, // front
+				4,   5,  6,  6,  7,  4, // back
+				8,   9, 10, 10, 11,  8, // right
+				12, 13, 14, 14, 15, 12, // left
+				16, 17, 18, 18, 19, 16, // top
+				20, 21, 22, 22, 23, 20  // bottom
+			};
+
+			std::string base_path = "C:\\Users\\sorok\\Desktop\\SimpleEngine2\\SimpleEngineCore\\shaders\\";
+			std::string vertex_shader_name = "ground_cube_vertex_shader.glsl";
+			std::string frag_shader_name = "ground_cube_fragment_shader.glsl";
+			p_shader_program = std::make_unique<ShaderProgram>(
+				base_path + vertex_shader_name, base_path + frag_shader_name);
+			if (!p_shader_program->is_compiled())
+				throw ShaderCompilationException("Shader compilation failed");
+			// VAO
+			p_vao = std::make_unique<VertexArray>();
+			p_vao->bind();
+
+			// todo it works only for cube for now
+			BufferLayout buffer_layout_vec3_vec3_vec2
+			{
+				ShaderDataType::Float3,
+				ShaderDataType::Float3,
+				ShaderDataType::Float2
+			};
+
+			// todo might find better way to store data. vector?
+			// VBO
+			if (sizeof(vertices) > 0) {
+				p_vbo = std::make_unique<VertexBuffer>(vertices, sizeof(vertices), buffer_layout_vec3_vec3_vec2);
+				p_vao->add_vertex_buffer(*p_vbo);
+			}
+			// INDEX BUFFER
+			if (sizeof(indices) > 0) {
+				p_index_buffer = std::make_unique<IndexBuffer>(indices, sizeof(indices) / sizeof(GLuint));
+				p_vao->set_index_buffer(*p_index_buffer);
+			}
+		}
+
+		void draw(Camera& camera) {
+			p_shader_program->bind();
+
+			// draw light cube
+			{
+				glm::mat4 translate_mat(
+					1, 0, 0, 0,
+					0, 1, 0, 0,
+					0, 0, 1, 0,
+					0, 0, -2, 1); // -2 to move down by z a bit 
+				p_shader_program->set_matrix4("mvp_mat",
+					camera.get_projection_matrix() * camera.get_updated_view_matrix() * translate_mat);
+				p_shader_program->set_vec3("ground_color", ground_source_color);
+				Renderer_OpenGL::draw(*p_vao);
+			}
+		}
+	private:
+		std::unique_ptr<ShaderProgram> p_shader_program;
+		std::unique_ptr<VertexArray> p_vao;
+		std::unique_ptr<VertexBuffer> p_vbo;
+		std::unique_ptr<IndexBuffer> p_index_buffer;
+
+		glm::vec3 ground_source_color{ 0.224f, 0.400f, 0.271f };
 	};
 }
