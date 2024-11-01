@@ -89,31 +89,6 @@ namespace SimpleEngine {
 			static_cast<unsigned int>(width * 0.07), 0, 0, 255);
 	}
 
-	void generate_quads_texture(
-		unsigned char* data,
-		const unsigned int width,
-		const unsigned int height)
-	{
-		for (unsigned int x = 0; x < width; ++x)
-		{
-			for (unsigned int y = 0; y < height; ++y)
-			{
-				if ((x < width / 2 && y < height / 2) || x >= width / 2 && y >= height / 2)
-				{
-					data[3 * (x + width * y) + 0] = 0;
-					data[3 * (x + width * y) + 1] = 0;
-					data[3 * (x + width * y) + 2] = 0;
-				}
-				else
-				{
-					data[3 * (x + width * y) + 0] = 255;
-					data[3 * (x + width * y) + 1] = 255;
-					data[3 * (x + width * y) + 2] = 255;
-				}
-			}
-		}
-	}
-
 	struct Material {
 		float ambient_factor = { 0.1f };
 		float diffuse_factor = { 1.0f };
@@ -212,10 +187,6 @@ namespace SimpleEngine {
 			p_texture_smile = std::make_unique<Texture2D>(data, w, h);
 			p_texture_smile->bind(0);
 
-			generate_quads_texture(data, w, h);
-			p_texture_quads = std::make_unique<Texture2D>(data, w, h);
-			p_texture_quads->bind(1);
-
 			delete[] data;
 		}
 
@@ -265,7 +236,6 @@ namespace SimpleEngine {
 		std::unique_ptr<VertexBuffer> p_vbo;
 		std::unique_ptr<IndexBuffer> p_index_buffer;
 		std::unique_ptr<Texture2D> p_texture_smile;
-		std::unique_ptr<Texture2D> p_texture_quads;
 
 		std::array<glm::vec3, 1> positions = {
 		glm::vec3(0.f, 0.f, 0.f) };

@@ -1,7 +1,6 @@
 #version 460
 
 in vec2 tex_coord_smile;
-in vec2 tex_coord_quads;
 in vec3 frag_pos_eye; // now we got data in cam space 
 in vec3 frag_normal_eye;
 
@@ -18,8 +17,6 @@ uniform float shininess;
 out vec4 frag_color;
 
 void main() {
-	//frag_color = texture(InTexture_Smile, tex_coord_smile) * texture(InTexture_Quads, tex_coord_quads);
-
 	// ambient
 	vec3 ambient = ambient_factor * light_color;
 

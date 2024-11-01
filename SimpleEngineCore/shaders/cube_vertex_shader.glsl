@@ -10,13 +10,11 @@ uniform mat3 normal_matrix;	// mat for normal; it has to be slightly different f
 uniform int current_frame;
 
 out vec2 tex_coord_smile;
-out vec2 tex_coord_quads;
 out vec3 frag_normal_eye; // in camera space
 out vec3 frag_pos_eye; // in camera space
 
 void main() {
 	tex_coord_smile = texture_coord;
-	tex_coord_quads = texture_coord + vec2(current_frame / 1000.f, current_frame / 1000.f);
 
 	frag_normal_eye = normal_matrix * vertex_normal;
 	frag_pos_eye = vec3(model_view_mat * vec4(vertex_position, 1.0));
