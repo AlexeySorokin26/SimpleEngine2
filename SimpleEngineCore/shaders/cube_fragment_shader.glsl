@@ -8,6 +8,7 @@ layout(binding = 0) uniform sampler2D InTexture_Smile;
 
 uniform vec3 light_color;
 uniform vec3 light_pos_eye;
+
 uniform float ambient_factor;
 uniform float diffuse_factor;
 uniform float specular_factor;

@@ -99,7 +99,7 @@ namespace SimpleEngine {
 
 		cube = std::make_unique<Cube>(Material());
 		lightCube = std::make_unique<LightCube>();
-		groundCube = std::make_unique<GroundCube>();
+		groundCube = std::make_unique<GroundCube>(Material());
 
 		Renderer_OpenGL::enable_depth_testing();
 		while (!m_bCloseWindow) {
@@ -123,7 +123,7 @@ namespace SimpleEngine {
 
 		cube->draw(camera, light_source_color, light_source_pos, scale_factor);
 		lightCube->draw(camera, light_source_color, light_source_pos);
-		groundCube->draw(camera);
+		groundCube->draw(camera, light_source_color);
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

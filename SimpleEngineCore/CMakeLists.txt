@@ -12,6 +12,9 @@ set(SHADER_FILES
 
     shaders/ground_cube_fragment_shader.glsl
     shaders/ground_cube_vertex_shader.glsl
+
+	shaders/phong_cube_fragment_shader.glsl
+    shaders/phong_cube_vertex_shader.glsl
 )
 
 set(ENGINE_PUBLIC_INCLUDES
@@ -33,6 +36,7 @@ set(ENGINE_PRIVATE_INCLUDES
 	src/SimpleEngineCore/Rendering/OpenGL/Renderer_OpenGL.h
 	src/SimpleEngineCore/Rendering/OpenGL/Texture2D.h
 	src/SimpleEngineCore/Rendering/OpenGL/Mesh.h
+	src/SimpleEngineCore/Rendering/OpenGL/Material.h
 )
 
 set(ENGINE_PRIVATE_SOURCES
