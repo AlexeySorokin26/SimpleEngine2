@@ -22,7 +22,7 @@
 namespace SimpleEngine {
 	std::unique_ptr<Cube> cube;
 	std::unique_ptr<LightCube> lightCube;
-	std::unique_ptr<GroundCube> groundCube;
+	std::unique_ptr<Cube> groundCube;
 
 	Application::Application() {
 		LOG_INFO("Starting Application");
@@ -99,7 +99,12 @@ namespace SimpleEngine {
 
 		cube = std::make_unique<Cube>(Material());
 		lightCube = std::make_unique<LightCube>();
-		groundCube = std::make_unique<GroundCube>(Material());
+		Material groundCubeMat = Material();
+		groundCubeMat.color[0] = 0.224f;
+		groundCubeMat.color[1] = 0.400f;
+		groundCubeMat.color[2] = 0.271f;
+		groundCubeMat.color[3] = 1.0f;
+		groundCube = std::make_unique<Cube>(groundCubeMat, glm::vec3{ 0,0,-2 });
 
 		Renderer_OpenGL::enable_depth_testing();
 		while (!m_bCloseWindow) {
@@ -121,9 +126,9 @@ namespace SimpleEngine {
 			m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
 		Renderer_OpenGL::clear();
 
-		cube->draw(camera, light_source_color, light_source_pos, scale_factor);
+		cube->draw(camera, light_source_color, light_source_pos, glm::vec3(scale_factor));
 		lightCube->draw(camera, light_source_color, light_source_pos);
-		groundCube->draw(camera, light_source_color);
+		groundCube->draw(camera, light_source_color, light_source_pos, glm::vec3{ 50, 50, 1 });
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

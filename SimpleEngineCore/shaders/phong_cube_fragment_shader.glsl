@@ -2,6 +2,9 @@
 
 in vec3 frag_pos;
 in vec3 frag_normal;
+in vec2 tex_coord_smile;
+
+layout(binding = 0) uniform sampler2D InTexture_Smile;
 
 uniform vec3 cube_color;
 uniform vec3 light_color; // todo it should have also ambient diffuse specular parts
@@ -28,5 +31,5 @@ void main() {
 	vec3 reflected_direction = reflect(-light_direction, normal);
 	vec3 specular_light = specular_factor * light_color * pow(max(dot(reflected_direction, view_direction), 0), shininess);
 
-	frag_color = vec4(ambient_light + diffuse_light + specular_light, 1.0) * vec4(cube_color, 1.0);
+	frag_color = vec4(ambient_light + diffuse_light + specular_light, 1.0) * vec4(cube_color, 1.0) * texture(InTexture_Smile, tex_coord_smile);;
 }

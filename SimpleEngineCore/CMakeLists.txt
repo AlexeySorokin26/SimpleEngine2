@@ -3,15 +3,9 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 set(PROJECT_NAME SimpleEngineCore)
 
 # Define shader files
-set(SHADER_FILES
-    shaders/cube_vertex_shader.glsl
-    shaders/cube_fragment_shader.glsl
-    
+set(SHADER_FILES    
 	shaders/light_cube_vertex_shader.glsl
     shaders/light_cube_fragment_shader.glsl
-
-    shaders/ground_cube_fragment_shader.glsl
-    shaders/ground_cube_vertex_shader.glsl
 
 	shaders/phong_cube_fragment_shader.glsl
     shaders/phong_cube_vertex_shader.glsl
