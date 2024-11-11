@@ -1,3 +1,6 @@
+#define STB_IMAGE_IMPLEMENTATION
+
+
 #include "SimpleEngineCore/Application.h"
 #include "SimpleEngineCore/Window.h"
 #include "SimpleEngineCore/Log.h"
@@ -97,14 +100,22 @@ namespace SimpleEngine {
 				m_event_dispatcher.dispatch(event);
 			});
 
-		cube = std::make_unique<Cube>(Material());
+		cube = std::make_unique<Cube>(
+			Material(),
+			glm::vec3{ -2.f, -2.f, 4.f },
+			"C:\\Users\\sorok\\Desktop\\SimpleEngine2\\SimpleEngineCore\\textures\\brick.png"
+		);
 		lightCube = std::make_unique<LightCube>();
 		Material groundCubeMat = Material();
 		groundCubeMat.color[0] = 0.224f;
 		groundCubeMat.color[1] = 0.400f;
 		groundCubeMat.color[2] = 0.271f;
 		groundCubeMat.color[3] = 1.0f;
-		groundCube = std::make_unique<Cube>(groundCubeMat, glm::vec3{ 0,0,-2 });
+		/*groundCube = std::make_unique<Cube>(
+			groundCubeMat,
+			glm::vec3{ 0,0,-2 },
+			"C:\\Users\\sorok\\Desktop\\SimpleEngine2\\SimpleEngineCore\\textures\\dirt.png"
+		);*/
 
 		Renderer_OpenGL::enable_depth_testing();
 		while (!m_bCloseWindow) {
@@ -128,7 +139,7 @@ namespace SimpleEngine {
 
 		cube->draw(camera, light_source_color, light_source_pos, glm::vec3(scale_factor));
 		lightCube->draw(camera, light_source_color, light_source_pos);
-		groundCube->draw(camera, light_source_color, light_source_pos, glm::vec3{ 50, 50, 1 });
+		//groundCube->draw(camera, light_source_color, light_source_pos, glm::vec3{ 50, 50, 1 });
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

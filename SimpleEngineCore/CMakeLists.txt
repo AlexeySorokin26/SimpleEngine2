@@ -102,6 +102,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 add_subdirectory(../external/glm ${CMAKE_CURRENT_BINARY_DIR}/glm)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm)
 
+target_include_directories(${PROJECT_NAME} PRIVATE ../external/stb)
+
 #imgui library create
 set(IMGUI_INCLUDES
 	../external/imgui/imgui.h

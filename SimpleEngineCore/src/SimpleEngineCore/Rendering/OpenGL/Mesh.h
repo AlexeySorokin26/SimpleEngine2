@@ -203,7 +203,7 @@ namespace SimpleEngine {
 
 	class Cube {
 	public:
-		Cube(const Material& material, glm::vec3 position = glm::vec3{ -2.f, -2.f, 4.f })
+		Cube(const Material& material, glm::vec3 position = glm::vec3{ -2.f, -2.f, 4.f }, const std::string& texturePath = "")
 			: material(material), position(position)
 		{
 			GLfloat vertices[] = {
@@ -278,15 +278,12 @@ namespace SimpleEngine {
 				p_vao->set_index_buffer(*p_index_buffer);
 			}
 
-			const unsigned int w = 1000;
-			const unsigned int h = 1000;
-			const unsigned int channels = 3; // rgb 
-			auto* data = new unsigned char[w * h * channels];
-			generate_smile_texture(data, w, h);
-			p_texture_smile = std::make_unique<Texture2D>(data, w, h);
-			p_texture_smile->bind(0);
-
-			delete[] data;
+			if (!texturePath.empty()) {
+				const unsigned int w = 1000;
+				const unsigned int h = 1000;
+				p_texture_smile = std::make_unique<Texture2D>(texturePath, w, h);
+				p_texture_smile->bind(0);
+			}
 		}
 
 		void draw(Camera& camera,
