@@ -102,6 +102,7 @@ namespace SimpleEngine {
 
 		cube = std::make_unique<Cube>(
 			Material(),
+			1,
 			glm::vec3{ -2.f, -2.f, 4.f },
 			"C:\\Users\\sorok\\Desktop\\SimpleEngine2\\SimpleEngineCore\\textures\\brick.png"
 		);
@@ -111,11 +112,12 @@ namespace SimpleEngine {
 		groundCubeMat.color[1] = 0.400f;
 		groundCubeMat.color[2] = 0.271f;
 		groundCubeMat.color[3] = 1.0f;
-		/*groundCube = std::make_unique<Cube>(
+		groundCube = std::make_unique<Cube>(
 			groundCubeMat,
+			1,
 			glm::vec3{ 0,0,-2 },
 			"C:\\Users\\sorok\\Desktop\\SimpleEngine2\\SimpleEngineCore\\textures\\dirt.png"
-		);*/
+		);
 
 		Renderer_OpenGL::enable_depth_testing();
 		while (!m_bCloseWindow) {
@@ -139,7 +141,7 @@ namespace SimpleEngine {
 
 		cube->draw(camera, light_source_color, light_source_pos, glm::vec3(scale_factor));
 		lightCube->draw(camera, light_source_color, light_source_pos);
-		//groundCube->draw(camera, light_source_color, light_source_pos, glm::vec3{ 50, 50, 1 });
+		groundCube->draw(camera, light_source_color, light_source_pos, glm::vec3{ 50, 50, 1 });
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

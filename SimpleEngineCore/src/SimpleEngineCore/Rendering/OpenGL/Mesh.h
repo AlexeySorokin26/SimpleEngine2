@@ -203,8 +203,8 @@ namespace SimpleEngine {
 
 	class Cube {
 	public:
-		Cube(const Material& material, glm::vec3 position = glm::vec3{ -2.f, -2.f, 4.f }, const std::string& texturePath = "")
-			: material(material), position(position)
+		Cube(const Material& material, int unit = 0, glm::vec3 position = glm::vec3{ -2.f, -2.f, 4.f }, const std::string& texturePath = "")
+			: material(material), unit(unit), position(position)
 		{
 			GLfloat vertices[] = {
 				//    position             normal            UV                  index
@@ -281,8 +281,8 @@ namespace SimpleEngine {
 			if (!texturePath.empty()) {
 				const unsigned int w = 1000;
 				const unsigned int h = 1000;
-				p_texture_smile = std::make_unique<Texture2D>(texturePath, w, h);
-				p_texture_smile->bind(0);
+				p_texture = std::make_unique<Texture2D>(texturePath, w, h);
+				p_texture->bind();
 			}
 		}
 
@@ -290,6 +290,7 @@ namespace SimpleEngine {
 			const float light_source_color[3], const float light_source_pos[3], const glm::vec3 scale_factor)
 		{
 			p_shader_program->bind();
+			p_texture->bind();
 
 			p_shader_program->set_vec3("cube_color",
 				glm::vec3(material.color[0], material.color[1], material.color[2]));
@@ -347,8 +348,9 @@ namespace SimpleEngine {
 		std::unique_ptr<VertexArray> p_vao;
 		std::unique_ptr<VertexBuffer> p_vbo;
 		std::unique_ptr<IndexBuffer> p_index_buffer;
-		std::unique_ptr<Texture2D> p_texture_smile;
+		std::unique_ptr<Texture2D> p_texture;
 
 		glm::vec3 position;
+		int unit = 0;
 	};
 }
