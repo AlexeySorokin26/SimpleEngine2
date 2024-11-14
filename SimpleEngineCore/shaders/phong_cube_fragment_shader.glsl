@@ -4,8 +4,8 @@ in vec3 frag_pos;
 in vec3 frag_normal;
 in vec2 tex_coord_smile;
 
-//layout(binding = 0) uniform sampler2D InTexture;
-uniform sampler2D InTexture;
+/*layout(binding = 0) */uniform sampler2D InTexture;
+//uniform sampler2D InTexture;
 
 uniform vec3 cube_color;
 uniform vec3 light_color;

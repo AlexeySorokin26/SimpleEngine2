@@ -282,7 +282,7 @@ namespace SimpleEngine {
 				const unsigned int w = 1000;
 				const unsigned int h = 1000;
 				p_texture = std::make_unique<Texture2D>(texturePath, w, h);
-				p_texture->bind();
+				//p_texture->bind(unit);
 			}
 		}
 
@@ -290,7 +290,8 @@ namespace SimpleEngine {
 			const float light_source_color[3], const float light_source_pos[3], const glm::vec3 scale_factor)
 		{
 			p_shader_program->bind();
-			p_texture->bind();
+			p_texture->bind(unit);
+			//p_shader_program->set_int("InTexture", unit);
 
 			p_shader_program->set_vec3("cube_color",
 				glm::vec3(material.color[0], material.color[1], material.color[2]));

@@ -102,7 +102,7 @@ namespace SimpleEngine {
 
 		cube = std::make_unique<Cube>(
 			Material(),
-			1,
+			0,
 			glm::vec3{ -2.f, -2.f, 4.f },
 			"C:\\Users\\sorok\\Desktop\\SimpleEngine2\\SimpleEngineCore\\textures\\brick.png"
 		);
@@ -114,7 +114,7 @@ namespace SimpleEngine {
 		groundCubeMat.color[3] = 1.0f;
 		groundCube = std::make_unique<Cube>(
 			groundCubeMat,
-			1,
+			0,
 			glm::vec3{ 0,0,-2 },
 			"C:\\Users\\sorok\\Desktop\\SimpleEngine2\\SimpleEngineCore\\textures\\dirt.png"
 		);
