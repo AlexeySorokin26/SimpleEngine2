@@ -12,6 +12,7 @@
 #include "SimpleEngineCore/Rendering/OpenGL/Material.h"
 #include "SimpleEngineCore/Rendering/OpenGL/Renderer_OpenGL.h"
 #include "SimpleEngineCore/Camera.h"
+#include "SimpleEngineCore/Utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -145,7 +146,7 @@ namespace SimpleEngine {
 				20, 21, 22, 22, 23, 20  // bottom
 			};
 
-			std::string base_path = "C:\\Users\\sorok\\Desktop\\SimpleEngine2\\SimpleEngineCore\\shaders\\";
+			std::string base_path = getBasePath() + "\\shaders\\";
 			std::string vertex_shader_name = "light_cube_vertex_shader.glsl";
 			std::string frag_shader_name = "light_cube_fragment_shader.glsl";
 			p_shader_program = std::make_unique<ShaderProgram>(
@@ -248,8 +249,9 @@ namespace SimpleEngine {
 				16, 17, 18, 18, 19, 16, // top
 				20, 21, 22, 22, 23, 20  // bottom
 			};
-
-			std::string base_path = "C:\\Users\\sorok\\Desktop\\SimpleEngine2\\SimpleEngineCore\\shaders\\";
+			//C:\Users\alexeysorokin\Desktop\SimpleEngine2\SimpleEngineCore\shaders
+			//std::string base_path = "C:\\Users\\alexeysorokin\\Desktop\\SimpleEngine2\\SimpleEngineCore\\shaders\\";
+			std::string base_path = getBasePath() + "\\shaders\\";
 			std::string vertex_shader_name = "phong_cube_vertex_shader.glsl";
 			std::string frag_shader_name = "phong_cube_fragment_shader.glsl";
 			p_shader_program = std::make_unique<ShaderProgram>(

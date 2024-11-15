@@ -18,6 +18,8 @@ set(ENGINE_PUBLIC_INCLUDES
 	includes/SimpleEngineCore/Camera.h	
 	includes/SimpleEngineCore/Keys.h	
 	includes/SimpleEngineCore/Input.h
+	includes/SimpleEngineCore/Input.h
+	includes/SimpleEngineCore/Utils.h
 )
 
 set(ENGINE_PRIVATE_INCLUDES
@@ -40,6 +42,7 @@ set(ENGINE_PRIVATE_SOURCES
 	src/SimpleEngineCore/Log.cpp
 	src/SimpleEngineCore/Camera.cpp
 	src/SimpleEngineCore/Input.cpp
+	src/SimpleEngineCore/Utils.cpp
 	src/SimpleEngineCore/Rendering/OpenGL/ShaderProgram.cpp
 	src/SimpleEngineCore/Rendering/OpenGL/VertexBuffer.cpp
 	src/SimpleEngineCore/Rendering/OpenGL/VertexArray.cpp

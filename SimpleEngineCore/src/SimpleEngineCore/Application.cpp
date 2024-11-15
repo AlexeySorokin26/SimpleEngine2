@@ -104,7 +104,8 @@ namespace SimpleEngine {
 			Material(),
 			0,
 			glm::vec3{ -2.f, -2.f, 4.f },
-			"C:\\Users\\sorok\\Desktop\\SimpleEngine2\\SimpleEngineCore\\textures\\brick.png"
+			//"C:\\Users\\alexeysorokin\\Desktop\\SimpleEngine2\\SimpleEngineCore\\textures\\brick.png"
+			getBasePath() + "\\textures\\brick.png"
 		);
 		lightCube = std::make_unique<LightCube>();
 		Material groundCubeMat = Material();
@@ -116,7 +117,8 @@ namespace SimpleEngine {
 			groundCubeMat,
 			0,
 			glm::vec3{ 0,0,-2 },
-			"C:\\Users\\sorok\\Desktop\\SimpleEngine2\\SimpleEngineCore\\textures\\dirt.png"
+			//"C:\\Users\\alexeysorokin\\Desktop\\SimpleEngine2\\SimpleEngineCore\\textures\\dirt.png"
+			getBasePath() + "\\textures\\\\textures\\dirt.png"
 		);
 
 		Renderer_OpenGL::enable_depth_testing();
