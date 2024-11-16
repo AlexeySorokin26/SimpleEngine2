@@ -3,6 +3,7 @@
 #include <memory>
 #include <stdexcept>
 #include <array>
+#include <filesystem>
 
 #include "SimpleEngineCore/Rendering/OpenGL/VertexBuffer.h"
 #include "SimpleEngineCore/Rendering/OpenGL/VertexArray.h"
@@ -146,11 +147,11 @@ namespace SimpleEngine {
 				20, 21, 22, 22, 23, 20  // bottom
 			};
 
-			std::string base_path = getBasePath() + "\\shaders\\";
-			std::string vertex_shader_name = "light_cube_vertex_shader.glsl";
-			std::string frag_shader_name = "light_cube_fragment_shader.glsl";
+			std::filesystem::path shaderPath = getBasePath() / "shaders";
+			std::filesystem::path vertex_shader_name = shaderPath / "light_cube_vertex_shader.glsl";
+			std::filesystem::path frag_shader_name = shaderPath / "light_cube_fragment_shader.glsl";
 			p_shader_program = std::make_unique<ShaderProgram>(
-				base_path + vertex_shader_name, base_path + frag_shader_name);
+				vertex_shader_name.string(), frag_shader_name.string());
 			if (!p_shader_program->is_compiled())
 				throw ShaderCompilationException("Shader compilation failed");
 			// VAO
@@ -249,13 +250,11 @@ namespace SimpleEngine {
 				16, 17, 18, 18, 19, 16, // top
 				20, 21, 22, 22, 23, 20  // bottom
 			};
-			//C:\Users\alexeysorokin\Desktop\SimpleEngine2\SimpleEngineCore\shaders
-			//std::string base_path = "C:\\Users\\alexeysorokin\\Desktop\\SimpleEngine2\\SimpleEngineCore\\shaders\\";
-			std::string base_path = getBasePath() + "\\shaders\\";
-			std::string vertex_shader_name = "phong_cube_vertex_shader.glsl";
-			std::string frag_shader_name = "phong_cube_fragment_shader.glsl";
+			std::filesystem::path shaderPath = getBasePath() / "shaders";
+			std::filesystem::path vertex_shader_name = shaderPath / "phong_cube_vertex_shader.glsl";
+			std::filesystem::path frag_shader_name = shaderPath / "phong_cube_fragment_shader.glsl";
 			p_shader_program = std::make_unique<ShaderProgram>(
-				base_path + vertex_shader_name, base_path + frag_shader_name);
+				vertex_shader_name.string(), frag_shader_name.string());
 			if (!p_shader_program->is_compiled())
 				throw ShaderCompilationException("Shader compilation failed");
 			// VAO

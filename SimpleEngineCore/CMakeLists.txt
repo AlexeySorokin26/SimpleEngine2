@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 set(PROJECT_NAME SimpleEngineCore)
 
+add_compile_definitions(SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+
 # Define shader files
 set(SHADER_FILES    
 	shaders/light_cube_vertex_shader.glsl

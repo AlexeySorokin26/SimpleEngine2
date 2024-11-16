@@ -15,7 +15,9 @@
 #include "SimpleEngineCore/Modules/UIModule.h"
 
 #include <GLFW/glfw3.h>
+
 #include <iostream>
+#include <filesystem>
 
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
@@ -100,25 +102,27 @@ namespace SimpleEngine {
 				m_event_dispatcher.dispatch(event);
 			});
 
+		std::filesystem::path cubeTexturePath = getBasePath() / "textures" / "brick.png";
 		cube = std::make_unique<Cube>(
 			Material(),
 			0,
 			glm::vec3{ -2.f, -2.f, 4.f },
-			//"C:\\Users\\alexeysorokin\\Desktop\\SimpleEngine2\\SimpleEngineCore\\textures\\brick.png"
-			getBasePath() + "\\textures\\brick.png"
+			cubeTexturePath.string()
 		);
+
 		lightCube = std::make_unique<LightCube>();
+
 		Material groundCubeMat = Material();
 		groundCubeMat.color[0] = 0.224f;
 		groundCubeMat.color[1] = 0.400f;
 		groundCubeMat.color[2] = 0.271f;
 		groundCubeMat.color[3] = 1.0f;
+		std::filesystem::path groundCubeTexturePath = getBasePath() / "textures" / "dirt.png";
 		groundCube = std::make_unique<Cube>(
 			groundCubeMat,
 			0,
 			glm::vec3{ 0,0,-2 },
-			//"C:\\Users\\alexeysorokin\\Desktop\\SimpleEngine2\\SimpleEngineCore\\textures\\dirt.png"
-			getBasePath() + "\\textures\\\\textures\\dirt.png"
+			groundCubeTexturePath.string()
 		);
 
 		Renderer_OpenGL::enable_depth_testing();

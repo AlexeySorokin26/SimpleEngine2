@@ -21,6 +21,7 @@ namespace SimpleEngine {
 
 		const GLsizei mip_levels = static_cast<GLsizei>(floor(log2(std::max(m_width, m_height)))) + 1;
 
+		// TODO update to use texture units load 2 texture 
 		// old way using only one texture in frag shader
 		//{
 		//	// create unique texture object 
@@ -51,6 +52,7 @@ namespace SimpleEngine {
 		//	glBindTexture(GL_TEXTURE_2D, 0);
 		//}
 
+		// TODO load 2 texture 
 		{
 			// we create and bind text object (new since opengl 4.5)
 			// (target could be cube, how many handles, handle)

@@ -8,17 +8,6 @@
 
 #include <filesystem>
 
-static std::string getBasePath1() {
-	// Get the current working directory
-	std::filesystem::path currentPath = std::filesystem::current_path();
-
-	// Construct the path relative to the current directory
-	// \ it handles the file system paths correctly across different platforms
-	std::filesystem::path basePath = currentPath / "SimpleEngine2" / "SimpleEngineCore";
-
-	return basePath.string();
-}
-
 class SimpleEngineEditor : public SimpleEngine::Application {
 
 	virtual void on_update() override {
@@ -231,7 +220,6 @@ int main() {
 	int returnCode = 0;
 	try
 	{
-		std::string t = getBasePath1();
 		auto myApp = std::make_unique<SimpleEngineEditor>();
 
 		returnCode = myApp->start(2048, 2048, "My first app");
