@@ -8,6 +8,7 @@
 
 #include <filesystem>
 
+
 class SimpleEngineEditor : public SimpleEngine::Application {
 
 	virtual void on_update() override {

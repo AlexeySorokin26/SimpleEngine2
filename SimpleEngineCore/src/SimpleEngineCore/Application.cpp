@@ -103,11 +103,12 @@ namespace SimpleEngine {
 			});
 
 		std::filesystem::path cubeTexturePath = getBasePath() / "textures" / "brick.png";
+		std::filesystem::path groundCubeTexturePath = getBasePath() / "textures" / "dirt.png";
 		cube = std::make_unique<Cube>(
 			Material(),
-			0,
 			glm::vec3{ -2.f, -2.f, 4.f },
-			cubeTexturePath.string()
+			cubeTexturePath.string(),
+			groundCubeTexturePath.string()
 		);
 
 		lightCube = std::make_unique<LightCube>();
@@ -117,10 +118,9 @@ namespace SimpleEngine {
 		groundCubeMat.color[1] = 0.400f;
 		groundCubeMat.color[2] = 0.271f;
 		groundCubeMat.color[3] = 1.0f;
-		std::filesystem::path groundCubeTexturePath = getBasePath() / "textures" / "dirt.png";
+
 		groundCube = std::make_unique<Cube>(
 			groundCubeMat,
-			0,
 			glm::vec3{ 0,0,-2 },
 			groundCubeTexturePath.string()
 		);

@@ -10,10 +10,10 @@ uniform mat4 mvp_mat;
 
 out vec3 frag_pos;
 out vec3 frag_normal;
-out vec2 tex_coord_smile;
+out vec2 tex_coord;
 
 void main() {
-	tex_coord_smile = texture_coord;
+	tex_coord = texture_coord;
 
 	frag_pos = vec3(m_mat * vec4(vertex_position, 1.0)); // we don't need project here 
 	frag_normal = normal_mat * vertex_normal;

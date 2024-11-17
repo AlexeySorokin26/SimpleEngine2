@@ -166,7 +166,6 @@ namespace SimpleEngine {
 				ShaderDataType::Float2
 			};
 
-			// todo might find better way to store data. vector?
 			// VBO
 			if (sizeof(vertices) > 0) {
 				p_vbo = std::make_unique<VertexBuffer>(vertices, sizeof(vertices), buffer_layout_vec3_vec3_vec2);
@@ -205,8 +204,8 @@ namespace SimpleEngine {
 
 	class Cube {
 	public:
-		Cube(const Material& material, int unit = 0, glm::vec3 position = glm::vec3{ -2.f, -2.f, 4.f }, const std::string& texturePath = "")
-			: material(material), unit(unit), position(position)
+		Cube(const Material& material, glm::vec3 position = glm::vec3{ -2.f, -2.f, 4.f }, const std::string& texturePath = "", const std::string& texturePath1 = "")
+			: material(material), position(position)
 		{
 			GLfloat vertices[] = {
 				//    position             normal            UV                  index
@@ -283,7 +282,12 @@ namespace SimpleEngine {
 				const unsigned int w = 1000;
 				const unsigned int h = 1000;
 				p_texture = std::make_unique<Texture2D>(texturePath, w, h);
-				//p_texture->bind(unit);
+			}
+
+			if (!texturePath1.empty()) {
+				const unsigned int w = 1000;
+				const unsigned int h = 1000;
+				p_texture1 = std::make_unique<Texture2D>(texturePath1, w, h);
 			}
 		}
 
@@ -291,8 +295,20 @@ namespace SimpleEngine {
 			const float light_source_color[3], const float light_source_pos[3], const glm::vec3 scale_factor)
 		{
 			p_shader_program->bind();
-			p_texture->bind(unit);
-			//p_shader_program->set_int("InTexture", unit);
+
+			if (p_texture) {
+				p_shader_program->set_int("InTexture", 0);
+				p_texture->bind(0);
+			}
+
+			if (p_texture1) {
+				// we have to bind it twice 
+				// first for our shader program 
+				// here we set sampler2D to be 0 so its here as handle
+				p_shader_program->set_int("InTexture1", 1);
+				// next we have to bind id of our loaded in memory texture 
+				p_texture1->bind(1);
+			}
 
 			p_shader_program->set_vec3("cube_color",
 				glm::vec3(material.color[0], material.color[1], material.color[2]));
@@ -306,7 +322,6 @@ namespace SimpleEngine {
 			p_shader_program->set_vec3("cam_pos",
 				camera.get_camera_pos());
 
-			// todo combine into material
 			p_shader_program->set_float("ambient_factor",
 				material.ambient_factor);
 
@@ -351,8 +366,8 @@ namespace SimpleEngine {
 		std::unique_ptr<VertexBuffer> p_vbo;
 		std::unique_ptr<IndexBuffer> p_index_buffer;
 		std::unique_ptr<Texture2D> p_texture;
+		std::unique_ptr<Texture2D> p_texture1;
 
 		glm::vec3 position;
-		int unit = 0;
 	};
 }

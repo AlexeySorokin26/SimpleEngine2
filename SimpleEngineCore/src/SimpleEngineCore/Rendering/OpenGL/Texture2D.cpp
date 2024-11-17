@@ -119,8 +119,8 @@ namespace SimpleEngine {
 		// that binds a texture to a specific texture unit directly in one step, 
 		// without needing to first set the active texture unit.
 		glBindTextureUnit(unit, m_id);
-		// glActiveTexture(GL_TEXTURE0);
-		// glBindTexture(GL_TEXTURE_2D, m_id);
+		//glActiveTexture(GL_TEXTURE0 + unit);
+		//glBindTexture(GL_TEXTURE_2D, m_id);
 	}
 }
 

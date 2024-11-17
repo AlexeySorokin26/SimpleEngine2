@@ -2,10 +2,10 @@
 
 in vec3 frag_pos;
 in vec3 frag_normal;
-in vec2 tex_coord_smile;
+in vec2 tex_coord;
 
-/*layout(binding = 0) */uniform sampler2D InTexture;
-//uniform sampler2D InTexture;
+layout(binding = 0) uniform sampler2D InTexture;
+layout(binding = 1) uniform sampler2D InTexture1;
 
 uniform vec3 cube_color;
 uniform vec3 light_color;
@@ -32,5 +32,7 @@ void main() {
 	vec3 reflected_direction = reflect(-light_direction, normal);
 	vec3 specular_light = specular_factor * light_color * pow(max(dot(reflected_direction, view_direction), 0), shininess);
 
-	frag_color = vec4(ambient_light + diffuse_light + specular_light, 1.0) * /*vec4(cube_color, 1.0) **/ texture(InTexture, tex_coord_smile);;
+	vec4 color = texture(InTexture, tex_coord);
+	vec4 color1 = texture(InTexture1, tex_coord);
+	frag_color = vec4(ambient_light + diffuse_light + specular_light, 1.0) * /*vec4(cube_color, 1.0) **/  mix(color, color1, 0.5);;
 }
