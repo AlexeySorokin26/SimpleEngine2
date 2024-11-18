@@ -28,6 +28,8 @@ namespace SimpleEngine {
 	std::unique_ptr<Cube> cube;
 	std::unique_ptr<LightCube> lightCube;
 	std::unique_ptr<Cube> groundCube;
+	std::unique_ptr<FlateSphere> flateSphere;
+	std::unique_ptr<FlateSphere> phongSphere;
 
 	Application::Application() {
 		LOG_INFO("Starting Application");
@@ -111,6 +113,20 @@ namespace SimpleEngine {
 			groundCubeTexturePath.string()
 		);
 
+		flateSphere = std::make_unique<FlateSphere>(
+			Material(),
+			glm::vec3{ -2.f, -2.f, 2.f },
+			"flate_sphere_vertex_shader.glsl",
+			"flate_sphere_fragment_shader.glsl"
+		);
+
+		phongSphere = std::make_unique<FlateSphere>(
+			Material(),
+			glm::vec3{ -2.f, -2.f, 6.f },
+			"phong_sphere_vertex_shader.glsl",
+			"phong_sphere_fragment_shader.glsl"
+		);
+
 		lightCube = std::make_unique<LightCube>();
 
 		Material groundCubeMat = Material();
@@ -148,6 +164,8 @@ namespace SimpleEngine {
 		cube->draw(camera, light_source_color, light_source_pos, glm::vec3(scale_factor));
 		lightCube->draw(camera, light_source_color, light_source_pos);
 		groundCube->draw(camera, light_source_color, light_source_pos, glm::vec3{ 50, 50, 1 });
+		flateSphere->draw(camera, light_source_color, light_source_pos, glm::vec3{ scale_factor });
+		phongSphere->draw(camera, light_source_color, light_source_pos, glm::vec3{ scale_factor });
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

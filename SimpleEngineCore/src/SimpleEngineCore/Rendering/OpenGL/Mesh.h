@@ -1,9 +1,11 @@
-#pragma once 
+﻿#pragma once 
 
 #include <memory>
 #include <stdexcept>
 #include <array>
 #include <filesystem>
+#include <cmath>
+#include <cstring>  // for memcpy
 
 #include "SimpleEngineCore/Rendering/OpenGL/VertexBuffer.h"
 #include "SimpleEngineCore/Rendering/OpenGL/VertexArray.h"
@@ -21,6 +23,7 @@
 #include <glm/trigonometric.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
+
 
 namespace SimpleEngine {
 
@@ -204,7 +207,7 @@ namespace SimpleEngine {
 
 	class Cube {
 	public:
-		Cube(const Material& material, glm::vec3 position = glm::vec3{ -2.f, -2.f, 4.f }, const std::string& texturePath = "", const std::string& texturePath1 = "")
+		Cube(const Material& material, glm::vec3 position = glm::vec3{ -2.f, -2.f, 40.f }, const std::string& texturePath = "", const std::string& texturePath1 = "")
 			: material(material), position(position)
 		{
 			GLfloat vertices[] = {
@@ -367,6 +370,223 @@ namespace SimpleEngine {
 		std::unique_ptr<IndexBuffer> p_index_buffer;
 		std::unique_ptr<Texture2D> p_texture;
 		std::unique_ptr<Texture2D> p_texture1;
+
+		glm::vec3 position;
+	};
+
+	void generateFlattenedSphere(GLfloat vertices[], GLuint indices[], float radius, int slices, int stacks) {
+		int vertexIndex = 0;
+		int indexIndex = 0;
+
+		// Generate vertices (positions and normals)
+		for (int i = 0; i <= stacks; ++i) {
+			float phi = glm::pi<float>() * (float(i) / float(stacks)); // Vertical angle
+			for (int j = 0; j <= slices; ++j) {
+				float theta = 2.0f * glm::pi<float>() * (float(j) / float(slices)); // Horizontal angle
+
+				// Calculate vertex position
+				float x = radius * sin(phi) * cos(theta);
+				// Flatten the sphere by reducing the y value (scale the y)
+				float y = radius * 0.05f * cos(phi); // 0.5f scales it to be flatter vertically
+				float z = radius * sin(phi) * sin(theta);
+
+				// Store position in vertices array
+				vertices[vertexIndex++] = x;
+				vertices[vertexIndex++] = y;
+				vertices[vertexIndex++] = z;
+
+				// Store normal in vertices array (normalized)
+				vertices[vertexIndex++] = x / radius;
+				vertices[vertexIndex++] = y / radius;
+				vertices[vertexIndex++] = z / radius;
+			}
+		}
+
+		// Generate indices for the sphere's triangle faces
+		for (int i = 0; i < stacks; ++i) {
+			for (int j = 0; j < slices; ++j) {
+				int first = (i * (slices + 1)) + j;
+				int second = first + slices + 1;
+
+				// Define two triangles for each quad
+				indices[indexIndex++] = first;
+				indices[indexIndex++] = second;
+				indices[indexIndex++] = first + 1;
+
+				indices[indexIndex++] = second;
+				indices[indexIndex++] = second + 1;
+				indices[indexIndex++] = first + 1;
+			}
+		}
+	}
+
+
+
+
+	class FlateSphere {
+	public:
+		FlateSphere(const Material& material, glm::vec3 position = glm::vec3{ 0.f, 0.f, 4.f }, std::string vshader_name = "", std::string fshader_name = "")
+			: material(material), position(position)
+		{
+			//constexpr int slices = 10;       // Number of slices (longitude divisions)
+			//constexpr int stacks = 10;       // Number of stacks (latitude divisions)
+			//float radius = 1.0f;   // Radius of the sphere
+
+			//// Calculate the number of vertices and indices
+			//const int numVertices = (stacks + 1) * (slices + 1);
+			//const int numIndices = 6 * stacks * slices;
+
+			//// Allocate memory for the arrays
+			//GLfloat vertices[numVertices * 6];  // 3 position + 3 normal per vertex
+			//GLuint indices[numIndices];
+
+			//// Generate the sphere
+			//generateFlattenedSphere(vertices, indices, radius, slices, stacks);
+
+
+
+			GLfloat vertices[] = {
+				// Positions (x, y, z) and Normals (nx, ny, nz)
+				// For flat shading, each triangle will share the same normal for all three of its vertices.
+
+				// Top half
+				0.0f, 1.0f, 0.0f,    0.0f, 1.0f, 0.0f,  // Top Pole
+				0.0f, 0.707f, 0.707f, 0.0f, 0.707f, 0.707f,
+				0.707f, 0.707f, 0.0f, 0.707f, 0.707f, 0.0f,
+				0.707f, 0.707f, -0.707f, 0.707f, 0.707f, -0.707f,
+				0.0f, 0.707f, -0.707f, 0.0f, 0.707f, -0.707f,
+				-0.707f, 0.707f, -0.707f, -0.707f, 0.707f, -0.707f, // Mid layers
+				-0.707f, 0.707f, 0.0f, -0.707f, 0.707f, 0.0f,
+				-0.707f, 0.707f, 0.707f, -0.707f, 0.707f, 0.707f,
+				0.0f, 0.707f, 0.707f, 0.0f, 0.707f, 0.707f,
+				// Bottom half
+				0.0f, -1.0f, 0.0f,   0.0f, -1.0f, 0.0f   // Bottom Pole
+			};
+
+
+			// Indices for flat shading (forming triangles)
+			GLuint indices[] = {
+				// Top part (First slice, between top pole and equator)
+				0, 1, 2,
+				2, 1, 3,
+
+				// Next slices 
+				4, 3, 1,
+				5, 4, 3,
+
+				6, 5, 4,
+				7, 6, 5,
+
+				8, 7, 6,
+				9, 8, 7,
+
+				// Bottom slices
+				10, 9, 8,
+				11, 10, 9,
+
+				// Continue for each slice..
+				// And finally, from the equator to the bottom pole
+				1, 2, 10,
+				2, 3, 10,
+
+				// ... Similarly for the next slices as well
+			};
+
+
+
+
+
+
+
+			std::filesystem::path shaderPath = getBasePath() / "shaders";
+			std::filesystem::path vertex_shader_name = shaderPath / vshader_name;
+			std::filesystem::path frag_shader_name = shaderPath / fshader_name;
+			p_shader_program = std::make_unique<ShaderProgram>(
+				vertex_shader_name.string(), frag_shader_name.string());
+			if (!p_shader_program->is_compiled())
+				throw ShaderCompilationException("Shader compilation failed");
+			// VAO
+			p_vao = std::make_unique<VertexArray>();
+			p_vao->bind();
+
+			BufferLayout buffer_layout_vec3_vec3
+			{
+				ShaderDataType::Float3,
+				ShaderDataType::Float3
+			};
+
+			// VBO
+			if (sizeof(vertices) > 0) {
+				p_vbo = std::make_unique<VertexBuffer>(vertices, sizeof(vertices), buffer_layout_vec3_vec3);
+				p_vao->add_vertex_buffer(*p_vbo);
+			}
+			// INDEX BUFFER
+			if (sizeof(indices) > 0) {
+				p_index_buffer = std::make_unique<IndexBuffer>(indices, sizeof(indices) / sizeof(GLuint));
+				p_vao->set_index_buffer(*p_index_buffer);
+			}
+		}
+
+		void draw(Camera& camera,
+			const float light_source_color[3], const float light_source_pos[3], const glm::vec3 scale_factor)
+		{
+			p_shader_program->bind();
+
+			p_shader_program->set_vec3("cube_color",
+				glm::vec3(material.color[0], material.color[1], material.color[2]));
+
+			p_shader_program->set_vec3("light_color",
+				glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+
+			p_shader_program->set_vec3("light_pos",
+				glm::vec3(light_source_pos[0], light_source_pos[1], light_source_pos[2]));
+
+			p_shader_program->set_vec3("cam_pos",
+				camera.get_camera_pos());
+
+			p_shader_program->set_float("ambient_factor",
+				material.ambient_factor);
+
+			p_shader_program->set_float("diffuse_factor",
+				material.diffuse_factor);
+
+			p_shader_program->set_float("specular_factor",
+				material.specular_factor);
+
+			p_shader_program->set_float("shininess",
+				material.shininess);
+
+			// draw cubes
+			{
+				glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), scale_factor);
+				glm::mat4 translate_mat(
+					1, 0, 0, 0,
+					0, 1, 0, 0,
+					0, 0, 1, 0,
+					position[0], position[1], position[2], 1);
+
+				const glm::mat4 m_mat =
+					translate_mat * scale_mat;
+				p_shader_program->set_matrix4("m_mat", m_mat);
+
+				const glm::mat4 normal_mat =
+					glm::mat3(transpose(inverse(m_mat)));
+				p_shader_program->set_matrix3("normal_mat", normal_mat);
+
+				const glm::mat4 mvp_mat =
+					camera.get_projection_matrix() * camera.get_updated_view_matrix() * m_mat;
+				p_shader_program->set_matrix4("mvp_mat", mvp_mat);
+
+				Renderer_OpenGL::draw(*p_vao);
+			}
+		}
+
+	private:
+		Material material;
+		std::unique_ptr<ShaderProgram> p_shader_program;
+		std::unique_ptr<VertexArray> p_vao;
+		std::unique_ptr<VertexBuffer> p_vbo;
+		std::unique_ptr<IndexBuffer> p_index_buffer;
 
 		glm::vec3 position;
 	};

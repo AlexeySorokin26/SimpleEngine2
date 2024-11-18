@@ -9,8 +9,14 @@ set(SHADER_FILES
 	shaders/light_cube_vertex_shader.glsl
     shaders/light_cube_fragment_shader.glsl
 
+	shaders/phong_cube_vertex_shader.glsl
 	shaders/phong_cube_fragment_shader.glsl
-    shaders/phong_cube_vertex_shader.glsl
+
+	shaders/flate_sphere_vertex_shader.glsl
+	shaders/flate_sphere_fragment_shader.glsl
+
+	shaders/phong_sphere_vertex_shader.glsl
+	shaders/phong_sphere_fragment_shader.glsl
 )
 
 set(ENGINE_PUBLIC_INCLUDES
