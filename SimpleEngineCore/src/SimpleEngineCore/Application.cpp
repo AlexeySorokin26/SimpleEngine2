@@ -24,6 +24,52 @@
 #include <imgui/backends/imgui_impl_glfw.h>
 
 
+// Vertices using std::vector<GLfloat>
+std::vector<GLfloat> vertices = {
+	//    position             normal            UV                  index
+	// FRONT
+	-1.0f, -1.f, -1.f,    -1.f,  0.f,  0.f,     0.f, 0.f,              // 0
+	-1.0f,  1.f, -1.f,    -1.f,  0.f,  0.f,     1.f, 0.f,              // 1
+	-1.0f,  1.f,  1.f,    -1.f,  0.f,  0.f,     1.f, 1.f,              // 2
+	-1.0f, -1.f,  1.f,    -1.f,  0.f,  0.f,     0.f, 1.f,              // 3
+	// BACK                                  
+	 1.0f, -1.f, -1.f,     1.f,  0.f,  0.f,     1.f, 0.f,              // 4
+	 1.0f,  1.f, -1.f,     1.f,  0.f,  0.f,     0.f, 0.f,              // 5
+	 1.0f,  1.f,  1.f,     1.f,  0.f,  0.f,     0.f, 1.f,              // 6
+	 1.0f, -1.f,  1.f,     1.f,  0.f,  0.f,     1.f, 1.f,              // 7
+	 // RIGHT
+	 -1.0f,  1.f, -1.f,     0.f,  1.f,  0.f,     0.f, 0.f,              // 8
+	  1.0f,  1.f, -1.f,     0.f,  1.f,  0.f,     1.f, 0.f,              // 9
+	  1.0f,  1.f,  1.f,     0.f,  1.f,  0.f,     1.f, 1.f,              // 10
+	 -1.0f,  1.f,  1.f,     0.f,  1.f,  0.f,     0.f, 1.f,              // 11
+	 // LEFT
+	 -1.0f, -1.f, -1.f,     0.f, -1.f,  0.f,     1.f, 0.f,              // 12
+	  1.0f, -1.f, -1.f,     0.f, -1.f,  0.f,     0.f, 0.f,              // 13
+	  1.0f, -1.f,  1.f,     0.f, -1.f,  0.f,     0.f, 1.f,              // 14
+	 -1.0f, -1.f,  1.f,     0.f, -1.f,  0.f,     1.f, 1.f,              // 15
+	 // TOP
+	 -1.0f, -1.f,  1.f,     0.f,  0.f,  1.f,     0.f, 0.f,              // 16
+	 -1.0f,  1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 0.f,              // 17
+	  1.0f,  1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 1.f,              // 18
+	  1.0f, -1.f,  1.f,     0.f,  0.f,  1.f,     0.f, 1.f,              // 19
+	  // BOTTOM
+	  -1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 1.f,              // 20
+	  -1.0f,  1.f, -1.f,    0.f,  0.f, -1.f,     1.f, 1.f,              // 21
+	   1.0f,  1.f, -1.f,    0.f,  0.f, -1.f,     1.f, 0.f,              // 22
+	   1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 0.f,              // 23
+};
+
+// Indices using std::vector<GLuint>
+std::vector<GLuint> indices = {
+	0,   1,  2,  2,  3,  0, // front
+	4,   5,  6,  6,  7,  4, // back
+	8,   9, 10, 10, 11,  8, // right
+	12, 13, 14, 14, 15, 12, // left
+	16, 17, 18, 18, 19, 16, // top
+	20, 21, 22, 22, 23, 20  // bottom
+};
+
+
 namespace SimpleEngine {
 	std::unique_ptr<Cube> cube;
 	std::unique_ptr<LightCube> lightCube;
@@ -111,13 +157,15 @@ namespace SimpleEngine {
 				Material(),
 				glm::vec3{ -2.f, -2.f, 4.f },
 				cubeTexturePath.string(),
-				groundCubeTexturePath.string()
+				groundCubeTexturePath.string(),
+				vertices,
+				indices
 			);
 		}
 
 		// Light cube 
 		{
-			lightCube = std::make_unique<LightCube>();
+			lightCube = std::make_unique<LightCube>(vertices, indices);
 		}
 
 		// Ground cube 
@@ -131,7 +179,10 @@ namespace SimpleEngine {
 			groundCube = std::make_unique<Cube>(
 				groundCubeMat,
 				glm::vec3{ 0,0,-2 },
-				groundCubeTexturePath.string()
+				groundCubeTexturePath.string(),
+				"",
+				vertices,
+				indices
 			);
 		}
 

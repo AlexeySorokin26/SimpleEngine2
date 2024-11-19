@@ -35,51 +35,8 @@ namespace SimpleEngine {
 
 	class LightCube {
 	public:
-		LightCube()
+		LightCube(const std::vector<GLfloat> vertices, const std::vector<GLuint> indices)
 		{
-			GLfloat vertices[] = {
-				//    position             normal            UV                  index
-				// FRONT
-				-1.0f, -1.f, -1.f,    -1.f,  0.f,  0.f,     0.f, 0.f,              // 0
-				-1.0f,  1.f, -1.f,    -1.f,  0.f,  0.f,     1.f, 0.f,              // 1
-				-1.0f,  1.f,  1.f,    -1.f,  0.f,  0.f,     1.f, 1.f,              // 2
-				-1.0f, -1.f,  1.f,    -1.f,  0.f,  0.f,     0.f, 1.f,              // 3
-				// BACK                                  
-				 1.0f, -1.f, -1.f,     1.f,  0.f,  0.f,     1.f, 0.f,              // 4
-				 1.0f,  1.f, -1.f,     1.f,  0.f,  0.f,     0.f, 0.f,              // 5
-				 1.0f,  1.f,  1.f,     1.f,  0.f,  0.f,     0.f, 1.f,              // 6
-				 1.0f, -1.f,  1.f,     1.f,  0.f,  0.f,     1.f, 1.f,              // 7
-				 // RIGHT
-				 -1.0f,  1.f, -1.f,     0.f,  1.f,  0.f,     0.f, 0.f,              // 8
-				  1.0f,  1.f, -1.f,     0.f,  1.f,  0.f,     1.f, 0.f,              // 9
-				  1.0f,  1.f,  1.f,     0.f,  1.f,  0.f,     1.f, 1.f,              // 10
-				 -1.0f,  1.f,  1.f,     0.f,  1.f,  0.f,     0.f, 1.f,              // 11
-				 // LEFT
-				 -1.0f, -1.f, -1.f,     0.f, -1.f,  0.f,     1.f, 0.f,              // 12
-				  1.0f, -1.f, -1.f,     0.f, -1.f,  0.f,     0.f, 0.f,              // 13
-				  1.0f, -1.f,  1.f,     0.f, -1.f,  0.f,     0.f, 1.f,              // 14
-				 -1.0f, -1.f,  1.f,     0.f, -1.f,  0.f,     1.f, 1.f,              // 15
-				 // TOP
-				 -1.0f, -1.f,  1.f,     0.f,  0.f,  1.f,     0.f, 0.f,              // 16
-				 -1.0f,  1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 0.f,              // 17
-				  1.0f,  1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 1.f,              // 18
-				  1.0f, -1.f,  1.f,     0.f,  0.f,  1.f,     0.f, 1.f,              // 19
-				  // BOTTOM
-				  -1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 1.f,              // 20
-				  -1.0f,  1.f, -1.f,    0.f,  0.f, -1.f,     1.f, 1.f,              // 21
-				   1.0f,  1.f, -1.f,    0.f,  0.f, -1.f,     1.f, 0.f,              // 22
-				   1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 0.f,              // 23
-			};
-
-			GLuint indices[] = {
-				0,   1,  2,  2,  3,  0, // front
-				4,   5,  6,  6,  7,  4, // back
-				8,   9, 10, 10, 11,  8, // right
-				12, 13, 14, 14, 15, 12, // left
-				16, 17, 18, 18, 19, 16, // top
-				20, 21, 22, 22, 23, 20  // bottom
-			};
-
 			std::filesystem::path shaderPath = getBasePath() / "shaders";
 			std::filesystem::path vertex_shader_name = shaderPath / "light_cube_vertex_shader.glsl";
 			std::filesystem::path frag_shader_name = shaderPath / "light_cube_fragment_shader.glsl";
@@ -101,12 +58,12 @@ namespace SimpleEngine {
 
 			// VBO
 			if (sizeof(vertices) > 0) {
-				p_vbo = std::make_unique<VertexBuffer>(vertices, sizeof(vertices), buffer_layout_vec3_vec3_vec2);
+				p_vbo = std::make_unique<VertexBuffer>(vertices.data(), vertices.size() * sizeof(GLfloat), buffer_layout_vec3_vec3_vec2);
 				p_vao->add_vertex_buffer(*p_vbo);
 			}
 			// INDEX BUFFER
 			if (sizeof(indices) > 0) {
-				p_index_buffer = std::make_unique<IndexBuffer>(indices, sizeof(indices) / sizeof(GLuint));
+				p_index_buffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());
 				p_vao->set_index_buffer(*p_index_buffer);
 			}
 		}
@@ -137,77 +94,42 @@ namespace SimpleEngine {
 
 	class Cube {
 	public:
-		Cube(const Material& material, glm::vec3 position = glm::vec3{ -2.f, -2.f, 40.f }, const std::string& texturePath = "", const std::string& texturePath1 = "")
-			: material(material), position(position)
+		Cube(const Material& material,
+			glm::vec3 position = glm::vec3{ -2.f, -2.f, 40.f },
+			const std::string& texturePath = "",
+			const std::string& texturePath1 = "",
+			const std::vector<GLfloat>& vertices = {},
+			const std::vector<GLuint>& indices = {})
+			: material(material), position(position), vertices(vertices), indices(indices)
 		{
-			GLfloat vertices[] = {
-				//    position             normal            UV                  index
-				// FRONT
-				-1.0f, -1.f, -1.f,    -1.f,  0.f,  0.f,     0.f, 0.f,              // 0
-				-1.0f,  1.f, -1.f,    -1.f,  0.f,  0.f,     1.f, 0.f,              // 1
-				-1.0f,  1.f,  1.f,    -1.f,  0.f,  0.f,     1.f, 1.f,              // 2
-				-1.0f, -1.f,  1.f,    -1.f,  0.f,  0.f,     0.f, 1.f,              // 3
-				// BACK                                  
-				 1.0f, -1.f, -1.f,     1.f,  0.f,  0.f,     1.f, 0.f,              // 4
-				 1.0f,  1.f, -1.f,     1.f,  0.f,  0.f,     0.f, 0.f,              // 5
-				 1.0f,  1.f,  1.f,     1.f,  0.f,  0.f,     0.f, 1.f,              // 6
-				 1.0f, -1.f,  1.f,     1.f,  0.f,  0.f,     1.f, 1.f,              // 7
-				 // RIGHT
-				 -1.0f,  1.f, -1.f,     0.f,  1.f,  0.f,     0.f, 0.f,              // 8
-				  1.0f,  1.f, -1.f,     0.f,  1.f,  0.f,     1.f, 0.f,              // 9
-				  1.0f,  1.f,  1.f,     0.f,  1.f,  0.f,     1.f, 1.f,              // 10
-				 -1.0f,  1.f,  1.f,     0.f,  1.f,  0.f,     0.f, 1.f,              // 11
-				 // LEFT
-				 -1.0f, -1.f, -1.f,     0.f, -1.f,  0.f,     1.f, 0.f,              // 12
-				  1.0f, -1.f, -1.f,     0.f, -1.f,  0.f,     0.f, 0.f,              // 13
-				  1.0f, -1.f,  1.f,     0.f, -1.f,  0.f,     0.f, 1.f,              // 14
-				 -1.0f, -1.f,  1.f,     0.f, -1.f,  0.f,     1.f, 1.f,              // 15
-				 // TOP
-				 -1.0f, -1.f,  1.f,     0.f,  0.f,  1.f,     0.f, 0.f,              // 16
-				 -1.0f,  1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 0.f,              // 17
-				  1.0f,  1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 1.f,              // 18
-				  1.0f, -1.f,  1.f,     0.f,  0.f,  1.f,     0.f, 1.f,              // 19
-				  // BOTTOM
-				  -1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 1.f,              // 20
-				  -1.0f,  1.f, -1.f,    0.f,  0.f, -1.f,     1.f, 1.f,              // 21
-				   1.0f,  1.f, -1.f,    0.f,  0.f, -1.f,     1.f, 0.f,              // 22
-				   1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 0.f,              // 23
-			};
-
-			GLuint indices[] = {
-				0,   1,  2,  2,  3,  0, // front
-				4,   5,  6,  6,  7,  4, // back
-				8,   9, 10, 10, 11,  8, // right
-				12, 13, 14, 14, 15, 12, // left
-				16, 17, 18, 18, 19, 16, // top
-				20, 21, 22, 22, 23, 20  // bottom
-			};
 			std::filesystem::path shaderPath = getBasePath() / "shaders";
 			std::filesystem::path vertex_shader_name = shaderPath / "phong_cube_vertex_shader.glsl";
 			std::filesystem::path frag_shader_name = shaderPath / "phong_cube_fragment_shader.glsl";
 			p_shader_program = std::make_unique<ShaderProgram>(
 				vertex_shader_name.string(), frag_shader_name.string());
+
 			if (!p_shader_program->is_compiled())
 				throw ShaderCompilationException("Shader compilation failed");
+
 			// VAO
 			p_vao = std::make_unique<VertexArray>();
 			p_vao->bind();
 
-			BufferLayout buffer_layout_vec3_vec3_vec2
-			{
+			BufferLayout buffer_layout_vec3_vec3_vec2{
 				ShaderDataType::Float3,
 				ShaderDataType::Float3,
 				ShaderDataType::Float2
 			};
 
 			// VBO
-			if (sizeof(vertices) > 0) {
-				p_vbo = std::make_unique<VertexBuffer>(vertices, sizeof(vertices), buffer_layout_vec3_vec3_vec2);
+			if (!vertices.empty()) {
+				p_vbo = std::make_unique<VertexBuffer>(vertices.data(), vertices.size() * sizeof(GLfloat), buffer_layout_vec3_vec3_vec2);
 				p_vao->add_vertex_buffer(*p_vbo);
 			}
+
 			// INDEX BUFFER
-			if (sizeof(indices) > 0) {
-				p_index_buffer = std::make_unique<IndexBuffer>(indices, sizeof(indices) / sizeof(GLuint));
+			if (!indices.empty()) {
+				p_index_buffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());
 				p_vao->set_index_buffer(*p_index_buffer);
 			}
 
@@ -235,11 +157,7 @@ namespace SimpleEngine {
 			}
 
 			if (p_texture1) {
-				// we have to bind it twice 
-				// first for our shader program 
-				// here we set sampler2D to be 0 so its here as handle
 				p_shader_program->set_int("InTexture1", 1);
-				// next we have to bind id of our loaded in memory texture 
 				p_texture1->bind(1);
 			}
 
@@ -302,6 +220,9 @@ namespace SimpleEngine {
 		std::unique_ptr<Texture2D> p_texture1;
 
 		glm::vec3 position;
+		std::vector<GLfloat> vertices;
+		std::vector<GLuint> indices;
 	};
+
 
 }
