@@ -28,8 +28,6 @@ namespace SimpleEngine {
 	std::unique_ptr<Cube> cube;
 	std::unique_ptr<LightCube> lightCube;
 	std::unique_ptr<Cube> groundCube;
-	std::unique_ptr<FlateSphere> flateSphere;
-	std::unique_ptr<FlateSphere> phongSphere;
 
 	Application::Application() {
 		LOG_INFO("Starting Application");
@@ -104,42 +102,38 @@ namespace SimpleEngine {
 				m_event_dispatcher.dispatch(event);
 			});
 
+		// Textures paths
 		std::filesystem::path cubeTexturePath = getBasePath() / "textures" / "brick.png";
 		std::filesystem::path groundCubeTexturePath = getBasePath() / "textures" / "dirt.png";
-		cube = std::make_unique<Cube>(
-			Material(),
-			glm::vec3{ -2.f, -2.f, 4.f },
-			cubeTexturePath.string(),
-			groundCubeTexturePath.string()
-		);
+		// Cube with 2 textures
+		{
+			cube = std::make_unique<Cube>(
+				Material(),
+				glm::vec3{ -2.f, -2.f, 4.f },
+				cubeTexturePath.string(),
+				groundCubeTexturePath.string()
+			);
+		}
 
-		flateSphere = std::make_unique<FlateSphere>(
-			Material(),
-			glm::vec3{ -2.f, -2.f, 2.f },
-			"flate_sphere_vertex_shader.glsl",
-			"flate_sphere_fragment_shader.glsl"
-		);
+		// Light cube 
+		{
+			lightCube = std::make_unique<LightCube>();
+		}
 
-		phongSphere = std::make_unique<FlateSphere>(
-			Material(),
-			glm::vec3{ -2.f, -2.f, 6.f },
-			"phong_sphere_vertex_shader.glsl",
-			"phong_sphere_fragment_shader.glsl"
-		);
+		// Ground cube 
+		{
+			Material groundCubeMat = Material();
+			groundCubeMat.color[0] = 0.224f;
+			groundCubeMat.color[1] = 0.400f;
+			groundCubeMat.color[2] = 0.271f;
+			groundCubeMat.color[3] = 1.0f;
 
-		lightCube = std::make_unique<LightCube>();
-
-		Material groundCubeMat = Material();
-		groundCubeMat.color[0] = 0.224f;
-		groundCubeMat.color[1] = 0.400f;
-		groundCubeMat.color[2] = 0.271f;
-		groundCubeMat.color[3] = 1.0f;
-
-		groundCube = std::make_unique<Cube>(
-			groundCubeMat,
-			glm::vec3{ 0,0,-2 },
-			groundCubeTexturePath.string()
-		);
+			groundCube = std::make_unique<Cube>(
+				groundCubeMat,
+				glm::vec3{ 0,0,-2 },
+				groundCubeTexturePath.string()
+			);
+		}
 
 		Renderer_OpenGL::enable_depth_testing();
 		while (!m_bCloseWindow) {
@@ -164,8 +158,6 @@ namespace SimpleEngine {
 		cube->draw(camera, light_source_color, light_source_pos, glm::vec3(scale_factor));
 		lightCube->draw(camera, light_source_color, light_source_pos);
 		groundCube->draw(camera, light_source_color, light_source_pos, glm::vec3{ 50, 50, 1 });
-		flateSphere->draw(camera, light_source_color, light_source_pos, glm::vec3{ scale_factor });
-		phongSphere->draw(camera, light_source_color, light_source_pos, glm::vec3{ scale_factor });
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();
