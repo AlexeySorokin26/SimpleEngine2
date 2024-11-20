@@ -13,6 +13,7 @@
 #include "SimpleEngineCore/Rendering/OpenGL/ShaderProgram.h"
 #include "SimpleEngineCore/Rendering/OpenGL/Texture2D.h"
 #include "SimpleEngineCore/Rendering/OpenGL/Material.h"
+#include "SimpleEngineCore/Rendering/OpenGL/Light.h"
 #include "SimpleEngineCore/Rendering/OpenGL/Renderer_OpenGL.h"
 #include "SimpleEngineCore/Camera.h"
 #include "SimpleEngineCore/Utils.h"
@@ -68,7 +69,7 @@ namespace SimpleEngine {
 			}
 		}
 
-		void draw(Camera& camera, const float light_source_color[3], const float light_source_pos[3]) {
+		void draw(Camera& camera, const glm::vec3& light_source_color, const glm::vec3& light_source_pos) {
 			p_shader_program->bind();
 
 			// draw light cube
@@ -80,8 +81,7 @@ namespace SimpleEngine {
 					light_source_pos[0], light_source_pos[1], light_source_pos[2], 1);
 				p_shader_program->set_matrix4("mvp_mat",
 					camera.get_projection_matrix() * camera.get_updated_view_matrix() * translate_mat);
-				p_shader_program->set_vec3("light_color",
-					glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+				p_shader_program->set_vec3("light_color", light_source_color);
 				Renderer_OpenGL::draw(*p_vao);
 			}
 		}
@@ -146,11 +146,11 @@ namespace SimpleEngine {
 			}
 		}
 
-		void draw(Camera& camera,
-			const float light_source_color[3], const float light_source_pos[3], const glm::vec3 scale_factor)
+		void draw(Camera& camera, const Light& light, const glm::vec3 scale_factor)
 		{
 			p_shader_program->bind();
 
+			// Textures
 			if (p_texture) {
 				p_shader_program->set_int("InTexture", 0);
 				p_texture->bind(0);
@@ -161,29 +161,25 @@ namespace SimpleEngine {
 				p_texture1->bind(1);
 			}
 
+			// Light props
+			p_shader_program->set_vec3("light_color", light.light_color);
+
+			p_shader_program->set_vec3("light_pos", light.light_pos);
+
+			// Cam 
+			p_shader_program->set_vec3("cam_pos", camera.get_camera_pos());
+
+			// Material
 			p_shader_program->set_vec3("cube_color",
 				glm::vec3(material.color[0], material.color[1], material.color[2]));
 
-			p_shader_program->set_vec3("light_color",
-				glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+			p_shader_program->set_float("ambient_factor", material.ambient_factor);
 
-			p_shader_program->set_vec3("light_pos",
-				glm::vec3(light_source_pos[0], light_source_pos[1], light_source_pos[2]));
+			p_shader_program->set_float("diffuse_factor", material.diffuse_factor);
 
-			p_shader_program->set_vec3("cam_pos",
-				camera.get_camera_pos());
+			p_shader_program->set_float("specular_factor", material.specular_factor);
 
-			p_shader_program->set_float("ambient_factor",
-				material.ambient_factor);
-
-			p_shader_program->set_float("diffuse_factor",
-				material.diffuse_factor);
-
-			p_shader_program->set_float("specular_factor",
-				material.specular_factor);
-
-			p_shader_program->set_float("shininess",
-				material.shininess);
+			p_shader_program->set_float("shininess", material.shininess);
 
 			// draw cubes
 			{

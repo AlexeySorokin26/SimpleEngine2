@@ -41,6 +41,7 @@ set(ENGINE_PRIVATE_INCLUDES
 	src/SimpleEngineCore/Rendering/OpenGL/Texture2D.h
 	src/SimpleEngineCore/Rendering/OpenGL/Mesh.h
 	src/SimpleEngineCore/Rendering/OpenGL/Material.h
+	src/SimpleEngineCore/Rendering/OpenGL/Light.h
 )
 
 set(ENGINE_PRIVATE_SOURCES

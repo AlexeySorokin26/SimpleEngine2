@@ -23,6 +23,8 @@
 #include <imgui/backends/imgui_impl_opengl3.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 
+#include <glm/vec3.hpp>
+
 
 // Vertices using std::vector<GLfloat>
 std::vector<GLfloat> vertices = {
@@ -206,9 +208,9 @@ namespace SimpleEngine {
 			m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
 		Renderer_OpenGL::clear();
 
-		cube->draw(camera, light_source_color, light_source_pos, glm::vec3(scale_factor));
+		cube->draw(camera, Light(light_source_pos, light_source_color), glm::vec3(scale_factor));
 		lightCube->draw(camera, light_source_color, light_source_pos);
-		groundCube->draw(camera, light_source_color, light_source_pos, glm::vec3{ 50, 50, 1 });
+		groundCube->draw(camera, Light(light_source_pos, light_source_color), glm::vec3{ 50, 50, 1 });
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

@@ -8,6 +8,7 @@
 
 #include <filesystem>
 
+#include <glm/gtc/type_ptr.hpp>
 
 class SimpleEngineEditor : public SimpleEngine::Application {
 
@@ -172,8 +173,8 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 
 		ImGui::Begin("Editor");
 		// if we change value
-		ImGui::SliderFloat3("Light source pos", light_source_pos, -10.f, 10.f);
-		ImGui::ColorEdit3("Light source color", light_source_color);
+		ImGui::SliderFloat3("Light source pos", glm::value_ptr(light_source_pos), -10.f, 10.f);
+		ImGui::ColorEdit3("Light source color", glm::value_ptr(light_source_color));
 		ImGui::SliderFloat("Ambient factor", &ambient_factor, 0.1f, 1.f);
 		ImGui::SliderFloat("Diffuse factor", &diffuse_factor, 0.1f, 1.f);
 		ImGui::SliderFloat("Specular factor", &specular_factor, 0.1f, 1.f);
