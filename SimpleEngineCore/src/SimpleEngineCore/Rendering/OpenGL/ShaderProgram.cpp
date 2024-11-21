@@ -129,25 +129,30 @@ namespace SimpleEngine {
 		glUseProgram(0); // means 0 shader 
 	}
 
+	GLint ShaderProgram::get_uniform_location(const char* name) const {
+		return glGetUniformLocation(m_id, name);
+	}
 	void ShaderProgram::set_matrix4(const char* name, const glm::mat4& matrix) const {
 		// get location by name, amount of args, transponse or not, pointer to data specially for glm such way
-		glUniformMatrix4fv(glGetUniformLocation(m_id, name), 1, GL_FALSE, glm::value_ptr(matrix));
+		glUniformMatrix4fv(get_uniform_location(name), 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
 	void ShaderProgram::set_matrix3(const char* name, const glm::mat3& matrix) const
 	{
-		glUniformMatrix3fv(glGetUniformLocation(m_id, name), 1, GL_FALSE, glm::value_ptr(matrix));
+		glUniformMatrix3fv(get_uniform_location(name), 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
 	void ShaderProgram::set_int(const char* name, const int value) const {
-		glUniform1i(glGetUniformLocation(m_id, name), value);
+		glUniform1i(get_uniform_location(name), value);
 	}
+
 	void ShaderProgram::set_float(const char* name, const float value) const
 	{
-		glUniform1f(glGetUniformLocation(m_id, name), value);
+		glUniform1f(get_uniform_location(name), value);
 	}
+
 	void ShaderProgram::set_vec3(const char* name, const glm::vec3& v) const
 	{
-		glUniform3f(glGetUniformLocation(m_id, name), v.x, v.y, v.z);
+		glUniform3f(get_uniform_location(name), v.x, v.y, v.z);
 	}
 }

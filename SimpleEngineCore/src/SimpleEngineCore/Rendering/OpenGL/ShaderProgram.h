@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include <glad/glad.h>
 
 namespace SimpleEngine {
 
@@ -29,6 +30,8 @@ namespace SimpleEngine {
 		void set_int(const char* name, const int value) const;
 		void set_float(const char* name, const float value) const;
 		void set_vec3(const char* name, const glm::vec3& v) const;
+
+		GLint get_uniform_location(const char* name) const;
 
 	private:
 		bool m_isCompiled = false;

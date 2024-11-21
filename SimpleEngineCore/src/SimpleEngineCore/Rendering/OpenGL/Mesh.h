@@ -69,7 +69,7 @@ namespace SimpleEngine {
 			}
 		}
 
-		void draw(Camera& camera, const glm::vec3& light_source_color, const glm::vec3& light_source_pos) {
+		void draw(Camera& camera, const Light& light) {
 			p_shader_program->bind();
 
 			// draw light cube
@@ -78,10 +78,15 @@ namespace SimpleEngine {
 					1, 0, 0, 0,
 					0, 1, 0, 0,
 					0, 0, 1, 0,
-					light_source_pos[0], light_source_pos[1], light_source_pos[2], 1);
+					light.pos[0], light.pos[1], light.pos[2], 1);
 				p_shader_program->set_matrix4("mvp_mat",
 					camera.get_projection_matrix() * camera.get_updated_view_matrix() * translate_mat);
-				p_shader_program->set_vec3("light_color", light_source_color);
+
+				light.UseLight(
+					p_shader_program->get_uniform_location("light_ambient"),
+					p_shader_program->get_uniform_location("light_diffuse"),
+					p_shader_program->get_uniform_location("light_specular"),
+					p_shader_program->get_uniform_location("light_pos"));
 				Renderer_OpenGL::draw(*p_vao);
 			}
 		}
@@ -161,25 +166,22 @@ namespace SimpleEngine {
 				p_texture1->bind(1);
 			}
 
-			// Light props
-			p_shader_program->set_vec3("light_color", light.light_color);
+			p_shader_program->set_vec3("globalAmbient", glm::vec3{ 0.2,0.2,0.2 });
 
-			p_shader_program->set_vec3("light_pos", light.light_pos);
+			light.UseLight(
+				p_shader_program->get_uniform_location("directionalLight.ambient"),
+				p_shader_program->get_uniform_location("directionalLight.diffuse"),
+				p_shader_program->get_uniform_location("directionalLight.specular"),
+				p_shader_program->get_uniform_location("directionalLight.pos"));
 
 			// Cam 
 			p_shader_program->set_vec3("cam_pos", camera.get_camera_pos());
 
-			// Material
-			p_shader_program->set_vec3("cube_color",
-				glm::vec3(material.color[0], material.color[1], material.color[2]));
-
-			p_shader_program->set_float("ambient_factor", material.ambient_factor);
-
-			p_shader_program->set_float("diffuse_factor", material.diffuse_factor);
-
-			p_shader_program->set_float("specular_factor", material.specular_factor);
-
-			p_shader_program->set_float("shininess", material.shininess);
+			material.UseMaterial(
+				p_shader_program->get_uniform_location("material.ambient"),
+				p_shader_program->get_uniform_location("material.diffuse"),
+				p_shader_program->get_uniform_location("material.specular"),
+				p_shader_program->get_uniform_location("material.shininess"));
 
 			// draw cubes
 			{

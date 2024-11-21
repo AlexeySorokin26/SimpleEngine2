@@ -31,13 +31,15 @@ namespace SimpleEngine {
 		float m_background_color[4] = { 0, 0, 0, 1 };
 
 		glm::vec3 light_source_pos{ 0.f, 0.f, 1.f };
-		glm::vec3 light_source_color{ 1.f, 1.f, 1.f };
+		glm::vec3 light_ambient_factor{ 0.1f, 0.1f, 0.1f };
+		glm::vec3 light_diffuse_factor{ 0.1f, 0.1f, 0.1f };
+		glm::vec3 light_specular_factor{ 0.5f, 0.5f, 0.5f };
 
-		float ambient_factor = { 0.1f };
-		float diffuse_factor = { 1.0f };
-		float specular_factor = { 0.5f };
 		float shininess = { 32.f };
 		float scale_factor = { 1.f };
+
+		float cube_shininess = { 32.f };
+		float cube_scale_factor = { 1.f };
 
 		bool scroll = false;
 		bool scrollUp = false;

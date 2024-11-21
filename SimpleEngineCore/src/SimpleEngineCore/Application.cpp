@@ -172,14 +172,8 @@ namespace SimpleEngine {
 
 		// Ground cube 
 		{
-			Material groundCubeMat = Material();
-			groundCubeMat.color[0] = 0.224f;
-			groundCubeMat.color[1] = 0.400f;
-			groundCubeMat.color[2] = 0.271f;
-			groundCubeMat.color[3] = 1.0f;
-
 			groundCube = std::make_unique<Cube>(
-				groundCubeMat,
+				Material(),
 				glm::vec3{ 0,0,-2 },
 				groundCubeTexturePath.string(),
 				"",
@@ -208,9 +202,10 @@ namespace SimpleEngine {
 			m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
 		Renderer_OpenGL::clear();
 
-		cube->draw(camera, Light(light_source_pos, light_source_color), glm::vec3(scale_factor));
-		lightCube->draw(camera, light_source_color, light_source_pos);
-		groundCube->draw(camera, Light(light_source_pos, light_source_color), glm::vec3{ 50, 50, 1 });
+		Light light(light_source_pos, light_ambient_factor, light_diffuse_factor, light_specular_factor);
+		cube->draw(camera, light, glm::vec3(cube_scale_factor));
+		lightCube->draw(camera, light);
+		groundCube->draw(camera, light, glm::vec3{ 50, 50, 1 });
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

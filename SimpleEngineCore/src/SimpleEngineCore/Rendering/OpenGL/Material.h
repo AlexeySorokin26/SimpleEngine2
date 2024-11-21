@@ -1,30 +1,35 @@
 #pragma once
 
+#include <glm/vec3.hpp>
 
 namespace SimpleEngine {
-	struct Material {
-		float ambient_factor = { 0.1f };
-		float diffuse_factor = { 1.0f };
-		float specular_factor = { 0.5f };
+	class Material {
+	public:
+		Material(
+			const glm::vec3& ambient = glm::vec3(1.0f, 1.0f, 1.0f),
+			const glm::vec3& diffuse = glm::vec3(1.0f, 1.0f, 1.0f),
+			const glm::vec3& specular = glm::vec3(1.0f, 1.0f, 1.0f),
+			const float shininess = 1.f
+		)
+			: ambient(ambient), diffuse(diffuse), specular(specular), shininess(shininess)
+		{
+		}
+		~Material() {}
+		glm::vec3 ambient{ 0.1f, 0.1f, 0.1f };
+		glm::vec3 diffuse{ 1.1f, 1.1f, 1.1f };
+		glm::vec3 specular{ 0.5f, 0.5f, 0.5f };
 		float shininess = { 32.f };
 
-		float color[4] = { .0f, 1.f, 1.f, 1.f };
+		void UseMaterial(
+			GLint ambient_loc = 0,
+			GLint diffuse_loc = 0,
+			GLint specular_loc = 0,
+			GLint shininess_loc = 0) const
+		{
+			glUniform3f(ambient_loc, ambient.x, ambient.y, ambient.z);
+			glUniform3f(diffuse_loc, diffuse.x, diffuse.y, diffuse.z);
+			glUniform3f(specular_loc, specular.x, specular.y, specular.z);
+			glUniform1f(shininess_loc, shininess);
+		}
 	};
-
-	struct AdvanceMaterial {
-		float ambient[4];
-		float diffuse[4];
-		float specular[4];
-		float shininess;
-		float color[4];
-	};
-
-	struct Gold : public AdvanceMaterial {
-		float ambient[4] = { 0.2474f, 0.1995f, 0.0745f, 1.0f };
-		float diffuse[4] = { 0.7516f, 0.1995f, 0.0745f, 1.0f };
-		float specular[4] = { 0.2474f, 0.1995f, 0.0745f, 1.0f };
-		float shininess = 51.2f;
-		float color[4] = { 0, 255, 255, 255 };
-	};
-
 }
