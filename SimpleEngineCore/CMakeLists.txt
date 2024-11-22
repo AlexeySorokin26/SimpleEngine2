@@ -14,9 +14,6 @@ set(SHADER_FILES
 
 	shaders/flate_sphere_vertex_shader.glsl
 	shaders/flate_sphere_fragment_shader.glsl
-
-	shaders/phong_sphere_vertex_shader.glsl
-	shaders/phong_sphere_fragment_shader.glsl
 )
 
 set(ENGINE_PUBLIC_INCLUDES
@@ -65,7 +62,6 @@ set(ENGINE_ALL_SOURCES
 	${ENGINE_PUBLIC_INCLUDES}	
 	${ENGINE_PRIVATE_INCLUDES}	
 	${ENGINE_PRIVATE_SOURCES}	
-	${SHADER_FILES}
 )
 
 add_library(
@@ -145,3 +141,8 @@ target_link_libraries(ImGui PRIVATE glad glfw)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ImGui) 
 
+# Add shaders to the main library target to ensure they appear in Solution Explorer
+target_sources(${PROJECT_NAME} PRIVATE ${SHADER_FILES})
+# Mark shader files as "not compiled" for Visual Studio
+set_source_files_properties(${SHADER_FILES} PROPERTIES HEADER_FILE_ONLY ON)
+source_group("Shaders" FILES ${SHADER_FILES})
