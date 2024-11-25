@@ -202,10 +202,12 @@ namespace SimpleEngine {
 			m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
 		Renderer_OpenGL::clear();
 
-		Light light(light_source_pos, light_ambient_factor, light_diffuse_factor, light_specular_factor);
-		cube->draw(camera, light, glm::vec3(cube_scale_factor));
-		lightCube->draw(camera, light);
-		groundCube->draw(camera, light, glm::vec3{ 50, 50, 1 });
+		DirectionalLight dirLight(
+			light_source_pos, light_ambient_factor, light_diffuse_factor, light_specular_factor,
+			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity);
+		cube->draw(camera, dirLight, glm::vec3(cube_scale_factor));
+		lightCube->draw(camera, dirLight);
+		groundCube->draw(camera, dirLight, glm::vec3{ 50, 50, 1 });
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

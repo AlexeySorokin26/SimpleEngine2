@@ -32,8 +32,11 @@ namespace SimpleEngine {
 
 		glm::vec3 light_source_pos{ 0.f, 0.f, 1.f };
 		glm::vec3 light_ambient_factor{ 0.1f, 0.1f, 0.1f };
+		float light_ambient_intensity{ 0.1f };
 		glm::vec3 light_diffuse_factor{ 0.1f, 0.1f, 0.1f };
+		float light_diffuse_intensity{ 0.4f };
 		glm::vec3 light_specular_factor{ 0.5f, 0.5f, 0.5f };
+		float light_specular_intensity{ 0.5f };
 
 		float shininess = { 32.f };
 		float scale_factor = { 1.f };

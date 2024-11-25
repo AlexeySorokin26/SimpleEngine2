@@ -11,8 +11,11 @@ layout(binding = 1) uniform sampler2D InTexture1;
 struct DirectionalLight
 {
 	vec3 ambient;
+	float ambientIntensity;
 	vec3 diffuse;
+	float diffuseIntensity;
 	vec3 specular;
+	float specularIntensity;
 	vec3 pos;
 };
 
@@ -33,18 +36,20 @@ out vec4 frag_color;
 
 void main() {
 	// ambient
-	vec3 ambient_light = globalAmbient * material.ambient + directionalLight.ambient * material.ambient;
+	vec3 ambient_light = globalAmbient * material.ambient +
+		directionalLight.ambientIntensity * directionalLight.ambient * material.ambient;
 
 	// diffuse 
 	vec3 normal = normalize(frag_normal);
 	vec3 light_direction = normalize(directionalLight.pos - frag_pos);
-	vec3 diffuse_light = directionalLight.diffuse * material.diffuse * max(dot(light_direction, normal), 0);
+	vec3 diffuse_light =
+		directionalLight.diffuseIntensity * directionalLight.diffuse * material.diffuse * max(dot(light_direction, normal), 0);
 
 	// specular
 	vec3 view_direction = normalize(cam_pos - frag_pos);
 	vec3 reflected_direction = reflect(-light_direction, normal);
-	vec3 specular_light = 
-		directionalLight.specular * material.specular * pow(max(dot(reflected_direction, view_direction), 0), material.shininess);
+	vec3 specular_light =
+		directionalLight.specularIntensity * directionalLight.specular * material.specular * pow(max(dot(reflected_direction, view_direction), 0), material.shininess);
 
 	vec4 colorTex = texture(InTexture, tex_coord);
 	vec4 colorTex1 = texture(InTexture1, tex_coord);

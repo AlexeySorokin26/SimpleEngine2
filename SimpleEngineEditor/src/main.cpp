@@ -175,8 +175,11 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 		// if we change value
 		ImGui::SliderFloat3("Light source pos", glm::value_ptr(light_source_pos), -10.f, 10.f);
 		ImGui::SliderFloat3("Light Ambient factor", glm::value_ptr(light_ambient_factor), 0.1f, 1.f);
+		ImGui::SliderFloat("Light Ambient intensity", &light_ambient_intensity, 0.1f, 1.f);
 		ImGui::SliderFloat3("Light Diffuse factor", glm::value_ptr(light_diffuse_factor), 0.1f, 1.f);
+		ImGui::SliderFloat("Light Diffuse intensity", &light_diffuse_intensity, 0.1f, 1.f);
 		ImGui::SliderFloat3("Light Specular factor", glm::value_ptr(light_specular_factor), 0.1f, 1.f);
+		ImGui::SliderFloat("Light Specular intensity", &light_specular_intensity, 0.1f, 1.f);
 		ImGui::SliderFloat("Material Shininess", &cube_shininess, 1.f, 128.f);
 		ImGui::SliderFloat("Cube scale", &cube_scale_factor, 0.001f, 100.f);
 
