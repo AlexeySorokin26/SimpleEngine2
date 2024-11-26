@@ -3,6 +3,8 @@
 #include <glm/vec3.hpp>
 
 namespace SimpleEngine {
+	// TODO use lightmaps 
+	// TODO add simple material too
 	class Material {
 	public:
 		Material(

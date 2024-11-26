@@ -68,8 +68,8 @@ namespace SimpleEngine {
 				p_vao->set_index_buffer(*p_index_buffer);
 			}
 		}
-
-		void draw(Camera& camera, const DirectionalLight& light) {
+		// TODO use another class for light
+		void draw(Camera& camera, const PointLight& light) {
 			p_shader_program->bind();
 
 			// draw light cube
@@ -78,18 +78,21 @@ namespace SimpleEngine {
 					1, 0, 0, 0,
 					0, 1, 0, 0,
 					0, 0, 1, 0,
-					light.pos[0], light.pos[1], light.pos[2], 1);
+					light.position[0], light.position[1], light.position[2], 1);
 				p_shader_program->set_matrix4("mvp_mat",
 					camera.get_projection_matrix() * camera.get_updated_view_matrix() * translate_mat);
 
 				light.UseLight(
-					p_shader_program->get_uniform_location("light_ambient"),
-					p_shader_program->get_uniform_location("light_diffuse"),
-					p_shader_program->get_uniform_location("light_specular"),
-					p_shader_program->get_uniform_location("light_pos"),
-					p_shader_program->get_uniform_location("directionalLight.ambientIntensity"),
-					p_shader_program->get_uniform_location("directionalLight.diffuseIntensity"),
-					p_shader_program->get_uniform_location("directionalLight.specularIntensity"));
+					p_shader_program->get_uniform_location("pointLight.ambient"),
+					p_shader_program->get_uniform_location("pointLight.diffuse"),
+					p_shader_program->get_uniform_location("pointLight.specular"),
+					p_shader_program->get_uniform_location("pointLight.position"),
+					p_shader_program->get_uniform_location("pointLight.ambientIntensity"),
+					p_shader_program->get_uniform_location("pointLight.diffuseIntensity"),
+					p_shader_program->get_uniform_location("pointLight.specularIntensity"),
+					p_shader_program->get_uniform_location("pointLight.constant"),
+					p_shader_program->get_uniform_location("pointLight.linear"),
+					p_shader_program->get_uniform_location("pointLight.quadratic"));
 				Renderer_OpenGL::draw(*p_vao);
 			}
 		}
@@ -154,7 +157,7 @@ namespace SimpleEngine {
 			}
 		}
 
-		void draw(Camera& camera, const DirectionalLight& light, const glm::vec3 scale_factor)
+		void draw(Camera& camera, const DirectionalLight& dirLight, const PointLight& pointLight, const glm::vec3 scale_factor)
 		{
 			p_shader_program->bind();
 
@@ -171,14 +174,27 @@ namespace SimpleEngine {
 
 			p_shader_program->set_vec3("globalAmbient", glm::vec3{ 0.2,0.2,0.2 });
 
-			light.UseLight(
+			dirLight.UseLight(
 				p_shader_program->get_uniform_location("directionalLight.ambient"),
 				p_shader_program->get_uniform_location("directionalLight.diffuse"),
 				p_shader_program->get_uniform_location("directionalLight.specular"),
-				p_shader_program->get_uniform_location("directionalLight.pos"),
+				p_shader_program->get_uniform_location("directionalLight.direction"),
 				p_shader_program->get_uniform_location("directionalLight.ambientIntensity"),
 				p_shader_program->get_uniform_location("directionalLight.diffuseIntensity"),
 				p_shader_program->get_uniform_location("directionalLight.specularIntensity")
+			);
+
+			pointLight.UseLight(
+				p_shader_program->get_uniform_location("pointLight.ambient"),
+				p_shader_program->get_uniform_location("pointLight.diffuse"),
+				p_shader_program->get_uniform_location("pointLight.specular"),
+				p_shader_program->get_uniform_location("pointLight.position"),
+				p_shader_program->get_uniform_location("pointLight.ambientIntensity"),
+				p_shader_program->get_uniform_location("pointLight.diffuseIntensity"),
+				p_shader_program->get_uniform_location("pointLight.specularIntensity"),
+				p_shader_program->get_uniform_location("pointLight.constant"),
+				p_shader_program->get_uniform_location("pointLight.linear"),
+				p_shader_program->get_uniform_location("pointLight.quadratic")
 			);
 
 			// Cam 

@@ -16,7 +16,22 @@ struct DirectionalLight
 	float diffuseIntensity;
 	vec3 specular;
 	float specularIntensity;
-	vec3 pos;
+	vec3 direction;
+};
+
+struct PointLight
+{
+	vec3 ambient;
+	float ambientIntensity;
+	vec3 diffuse;
+	float diffuseIntensity;
+	vec3 specular;
+	float specularIntensity;
+	vec3 position;
+
+	float constant;
+	float linear;
+	float quadratic;
 };
 
 struct Material
@@ -29,27 +44,40 @@ struct Material
 
 uniform vec3 globalAmbient;
 uniform DirectionalLight directionalLight;
+uniform PointLight pointLight;
 uniform Material material;
 uniform vec3 cam_pos;
 
 out vec4 frag_color;
 
+
 void main() {
+	// Point light 
+	float distance = length(pointLight.position - frag_pos);
+	float attenuation = 1.0 / (pointLight.constant + pointLight.linear * distance +
+		pointLight.quadratic * (distance * distance));
+
 	// ambient
 	vec3 ambient_light = globalAmbient * material.ambient +
-		directionalLight.ambientIntensity * directionalLight.ambient * material.ambient;
+		directionalLight.ambientIntensity * directionalLight.ambient * material.ambient +
+		attenuation * pointLight.ambientIntensity * pointLight.ambient * material.ambient; // TODO use light map
 
 	// diffuse 
 	vec3 normal = normalize(frag_normal);
-	vec3 light_direction = normalize(directionalLight.pos - frag_pos);
+	vec3 light_direction_point_light = normalize(pointLight.position - frag_pos);
+	vec3 light_direction = normalize(-directionalLight.direction);
 	vec3 diffuse_light =
-		directionalLight.diffuseIntensity * directionalLight.diffuse * material.diffuse * max(dot(light_direction, normal), 0);
+		directionalLight.diffuseIntensity * directionalLight.diffuse * material.diffuse * max(dot(light_direction, normal), 0) +
+		attenuation * pointLight.diffuseIntensity * pointLight.diffuse * material.diffuse * max(dot(light_direction_point_light, normal), 0);
 
 	// specular
 	vec3 view_direction = normalize(cam_pos - frag_pos);
 	vec3 reflected_direction = reflect(-light_direction, normal);
+	vec3 reflected_direction_point_light = reflect(-light_direction_point_light, normal);
 	vec3 specular_light =
-		directionalLight.specularIntensity * directionalLight.specular * material.specular * pow(max(dot(reflected_direction, view_direction), 0), material.shininess);
+		directionalLight.specularIntensity * directionalLight.specular * material.specular * pow(max(dot(reflected_direction, view_direction), 0), material.shininess) +
+		attenuation * pointLight.specularIntensity * pointLight.specular * material.specular * 
+		pow(max(dot(reflected_direction_point_light, view_direction), 0), material.shininess);
 
 	vec4 colorTex = texture(InTexture, tex_coord);
 	vec4 colorTex1 = texture(InTexture1, tex_coord);

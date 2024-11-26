@@ -173,7 +173,8 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 
 		ImGui::Begin("Editor");
 		// if we change value
-		ImGui::SliderFloat3("Light source pos", glm::value_ptr(light_source_pos), -10.f, 10.f);
+		ImGui::SliderFloat3("Point light position", glm::value_ptr(point_light_position), -10.f, 10.f);
+		ImGui::SliderFloat3("Directional light direction", glm::value_ptr(directional_light_direction), -1.f, 1.f);
 		ImGui::SliderFloat3("Light Ambient factor", glm::value_ptr(light_ambient_factor), 0.1f, 1.f);
 		ImGui::SliderFloat("Light Ambient intensity", &light_ambient_intensity, 0.1f, 1.f);
 		ImGui::SliderFloat3("Light Diffuse factor", glm::value_ptr(light_diffuse_factor), 0.1f, 1.f);

@@ -203,11 +203,14 @@ namespace SimpleEngine {
 		Renderer_OpenGL::clear();
 
 		DirectionalLight dirLight(
-			light_source_pos, light_ambient_factor, light_diffuse_factor, light_specular_factor,
+			directional_light_direction, light_ambient_factor, light_diffuse_factor, light_specular_factor,
 			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity);
-		cube->draw(camera, dirLight, glm::vec3(cube_scale_factor));
-		lightCube->draw(camera, dirLight);
-		groundCube->draw(camera, dirLight, glm::vec3{ 50, 50, 1 });
+		PointLight pointLight(
+			point_light_position, light_ambient_factor, light_diffuse_factor, light_specular_factor,
+			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity);
+		cube->draw(camera, dirLight, pointLight, glm::vec3(cube_scale_factor));
+		lightCube->draw(camera, pointLight);
+		groundCube->draw(camera, dirLight, pointLight, glm::vec3{ 50, 50, 1 });
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();
