@@ -65,7 +65,8 @@ namespace SimpleEngine {
 			float quadratic = 0.032f
 		)
 			: position(position), ambient(ambient), diffuse(diffuse), specular(specular),
-			ambientIntensity(ambientIntensity), diffuseIntensity(diffuseIntensity), specularIntensity(specularIntensity)
+			ambientIntensity(ambientIntensity), diffuseIntensity(diffuseIntensity), specularIntensity(specularIntensity),
+			constant(constant), linear(linear), quadratic(quadratic)
 		{
 		}
 		~PointLight() {}

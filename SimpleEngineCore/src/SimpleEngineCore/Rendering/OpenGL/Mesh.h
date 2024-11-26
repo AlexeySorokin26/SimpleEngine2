@@ -83,9 +83,9 @@ namespace SimpleEngine {
 					camera.get_projection_matrix() * camera.get_updated_view_matrix() * translate_mat);
 
 				light.UseLight(
-					p_shader_program->get_uniform_location("pointLight.ambient"),
-					p_shader_program->get_uniform_location("pointLight.diffuse"),
-					p_shader_program->get_uniform_location("pointLight.specular"),
+					p_shader_program->get_uniform_location("light_ambient"),
+					p_shader_program->get_uniform_location("light_diffuse"),
+					p_shader_program->get_uniform_location("light_specular"), // TODO rest should be deleted 
 					p_shader_program->get_uniform_location("pointLight.position"),
 					p_shader_program->get_uniform_location("pointLight.ambientIntensity"),
 					p_shader_program->get_uniform_location("pointLight.diffuseIntensity"),

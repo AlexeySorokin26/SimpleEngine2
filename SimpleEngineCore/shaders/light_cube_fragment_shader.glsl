@@ -3,7 +3,6 @@
 uniform vec3 light_ambient;
 uniform vec3 light_diffuse;
 uniform vec3 light_specular;
-uniform vec3 light_pos;
 
 out vec4 frag_color;
 
