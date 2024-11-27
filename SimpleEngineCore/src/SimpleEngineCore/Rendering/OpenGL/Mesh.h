@@ -68,7 +68,6 @@ namespace SimpleEngine {
 				p_vao->set_index_buffer(*p_index_buffer);
 			}
 		}
-		// TODO use another class for light
 		void draw(Camera& camera, const PointLight& light) {
 			p_shader_program->bind();
 
@@ -163,12 +162,12 @@ namespace SimpleEngine {
 
 			// Textures
 			if (p_texture) {
-				p_shader_program->set_int("InTexture", 0);
+				p_shader_program->set_int("material.diffuse", 0);
 				p_texture->bind(0);
 			}
 
 			if (p_texture1) {
-				p_shader_program->set_int("InTexture1", 1);
+				p_shader_program->set_int("material.specular", 1);
 				p_texture1->bind(1);
 			}
 
@@ -202,8 +201,8 @@ namespace SimpleEngine {
 
 			material.UseMaterial(
 				p_shader_program->get_uniform_location("material.ambient"),
-				p_shader_program->get_uniform_location("material.diffuse"),
-				p_shader_program->get_uniform_location("material.specular"),
+				//p_shader_program->get_uniform_location("material.diffuse"),
+				//p_shader_program->get_uniform_location("material.specular"),
 				p_shader_program->get_uniform_location("material.shininess"));
 
 			// draw cubes

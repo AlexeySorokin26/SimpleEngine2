@@ -4,8 +4,8 @@ in vec3 frag_pos;
 in vec3 frag_normal;
 in vec2 tex_coord;
 
-layout(binding = 0) uniform sampler2D InTexture;
-layout(binding = 1) uniform sampler2D InTexture1;
+//layout(binding = 0) uniform sampler2D InTexture;
+//layout(binding = 1) uniform sampler2D InTexture1;
 
 
 struct DirectionalLight
@@ -37,8 +37,8 @@ struct PointLight
 struct Material
 {
 	vec3 ambient;
-	vec3 diffuse;
-	vec3 specular;
+	sampler2D diffuse;
+	sampler2D specular;
 	float shininess;
 };
 
@@ -60,38 +60,41 @@ vec3 ComputePointLight(vec3 frag_pos, vec3 frag_normal, vec3 view_direction) {
 		pointLight.quadratic * (distance * distance));
 
 	// Ambient
-	vec3 ambient = attenuation * pointLight.ambientIntensity * pointLight.ambient * material.ambient;
+	vec3 ambient = attenuation * pointLight.ambientIntensity * pointLight.ambient *
+		vec3(texture(material.diffuse, tex_coord));
 
 	// Diffuse
 	vec3 light_direction = normalize(pointLight.position - frag_pos);
-	vec3 diffuse = attenuation * pointLight.diffuseIntensity * pointLight.diffuse * material.diffuse *
-		max(dot(light_direction, frag_normal), 0.0);
+	vec3 diffuse = attenuation * pointLight.diffuseIntensity * pointLight.diffuse *
+		vec3(texture(material.diffuse, tex_coord)) * max(dot(light_direction, frag_normal), 0.0);
 
 	// Specular
 	vec3 reflected_direction = reflect(-light_direction, frag_normal);
-	vec3 specular = attenuation * pointLight.specularIntensity * pointLight.specular * material.specular *
+	vec3 specular = attenuation * pointLight.specularIntensity * pointLight.specular * 
+		vec3(texture(material.specular, tex_coord)) *
 		pow(max(dot(reflected_direction, view_direction), 0.0), material.shininess);
 
 	return ambient + diffuse + specular;
 }
 
 // Function to compute directional light contribution
-vec3 ComputeDirectionalLight(vec3 frag_normal, vec3 view_direction) {
-	// Ambient
-	vec3 ambient = directionalLight.ambientIntensity * directionalLight.ambient * material.ambient;
-
-	// Diffuse
-	vec3 light_direction = normalize(-directionalLight.direction);
-	vec3 diffuse = directionalLight.diffuseIntensity * directionalLight.diffuse * material.diffuse *
-		max(dot(light_direction, frag_normal), 0.0);
-
-	// Specular
-	vec3 reflected_direction = reflect(-light_direction, frag_normal);
-	vec3 specular = directionalLight.specularIntensity * directionalLight.specular * material.specular *
-		pow(max(dot(reflected_direction, view_direction), 0.0), material.shininess);
-
-	return ambient + diffuse + specular;
-}
+//vec3 ComputeDirectionalLight(vec3 frag_normal, vec3 view_direction) {
+//	// Ambient
+//	vec3 ambient = directionalLight.ambientIntensity * directionalLight.ambient * 
+//		vec3(texture(material.diffuse, tex_coord));
+//
+//	// Diffuse
+//	vec3 light_direction = normalize(-directionalLight.direction);
+//	vec3 diffuse = directionalLight.diffuseIntensity * directionalLight.diffuse * material.diffuse *
+//		max(dot(light_direction, frag_normal), 0.0);
+//
+//	// Specular
+//	vec3 reflected_direction = reflect(-light_direction, frag_normal);
+//	vec3 specular = directionalLight.specularIntensity * directionalLight.specular * material.specular *
+//		pow(max(dot(reflected_direction, view_direction), 0.0), material.shininess);
+//
+//	return ambient + diffuse + specular;
+//}
 
 void main() {
 	// Normalize inputs
@@ -100,13 +103,14 @@ void main() {
 
 	// Compute lighting
 	vec3 point_light = ComputePointLight(frag_pos, normal, view_direction);
-	vec3 directional_light = ComputeDirectionalLight(normal, view_direction);
+	//vec3 directional_light = ComputeDirectionalLight(normal, view_direction);
 
 	// Combine lights
-	vec3 total_light = globalAmbient * material.ambient + point_light + directional_light;
+	vec3 total_light = globalAmbient * material.ambient + point_light /*+ directional_light*/;
 
 	// Texture mapping and output
-	vec4 colorTex = texture(InTexture, tex_coord);
-	vec4 colorTex1 = texture(InTexture1, tex_coord);
-	frag_color = vec4(total_light, 1.0) * mix(colorTex, colorTex1, 0.5);
+	//vec4 colorTex = texture(InTexture, tex_coord);
+	//vec4 colorTex1 = texture(InTexture1, tex_coord);
+	//frag_color = vec4(total_light, 1.0) * mix(colorTex, colorTex1, 0.5);
+	frag_color = vec4(total_light, 1.0);
 }

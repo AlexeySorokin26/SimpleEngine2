@@ -25,8 +25,6 @@
 
 #include <glm/vec3.hpp>
 
-
-// Vertices using std::vector<GLfloat>
 std::vector<GLfloat> vertices = {
 	//    position             normal            UV                  index
 	// FRONT
@@ -61,7 +59,6 @@ std::vector<GLfloat> vertices = {
 	   1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 0.f,              // 23
 };
 
-// Indices using std::vector<GLuint>
 std::vector<GLuint> indices = {
 	0,   1,  2,  2,  3,  0, // front
 	4,   5,  6,  6,  7,  4, // back
@@ -151,15 +148,16 @@ namespace SimpleEngine {
 			});
 
 		// Textures paths
-		std::filesystem::path cubeTexturePath = getBasePath() / "textures" / "brick.png";
+		std::filesystem::path cubeDiffuseTexturePath = getBasePath() / "textures" / "containerDiffuse.png";
+		std::filesystem::path cubeSpecularTexturePath = getBasePath() / "textures" / "containerSpecular.png";
 		std::filesystem::path groundCubeTexturePath = getBasePath() / "textures" / "dirt.png";
 		// Cube with 2 textures
 		{
 			cube = std::make_unique<Cube>(
 				Material(),
 				glm::vec3{ -2.f, -2.f, 4.f },
-				cubeTexturePath.string(),
-				groundCubeTexturePath.string(),
+				cubeDiffuseTexturePath.string(),
+				cubeSpecularTexturePath.string(),
 				vertices,
 				indices
 			);
