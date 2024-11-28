@@ -173,6 +173,9 @@ class SimpleEngineEditor : public SimpleEngine::Application {
 
 		ImGui::Begin("Editor");
 		// if we change value
+		ImGui::Checkbox("Use point light", &usePointLight);
+		ImGui::Checkbox("Use directional light", &useDirectionalLight);
+		ImGui::Checkbox("Use spotlight", &useSpotLight);
 		ImGui::SliderFloat3("Point light position", glm::value_ptr(point_light_position), -10.f, 10.f);
 		ImGui::SliderFloat3("Directional light direction", glm::value_ptr(directional_light_direction), -1.f, 1.f);
 		ImGui::SliderFloat3("Light Ambient factor", glm::value_ptr(light_ambient_factor), 0.1f, 1.f);

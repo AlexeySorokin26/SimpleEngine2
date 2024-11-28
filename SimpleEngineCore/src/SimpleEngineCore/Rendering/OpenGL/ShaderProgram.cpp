@@ -146,6 +146,10 @@ namespace SimpleEngine {
 		glUniform1i(get_uniform_location(name), value);
 	}
 
+	void ShaderProgram::set_bool(const char* name, const bool value) const {
+		glUniform1i(get_uniform_location(name), value);
+	}
+
 	void ShaderProgram::set_float(const char* name, const float value) const
 	{
 		glUniform1f(get_uniform_location(name), value);

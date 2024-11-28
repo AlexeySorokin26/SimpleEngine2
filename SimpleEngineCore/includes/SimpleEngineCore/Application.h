@@ -30,6 +30,10 @@ namespace SimpleEngine {
 
 		float m_background_color[4] = { 0, 0, 0, 1 };
 
+		bool usePointLight = true;
+		bool useDirectionalLight = true;
+		bool useSpotLight = true;
+
 		glm::vec3 directional_light_direction{ 0.f, 0.f, 1.f };
 		glm::vec3 point_light_position{ 0.f, 0.f, 1.f };
 		glm::vec3 light_ambient_factor{ 1.f, 1.f, 1.1f };

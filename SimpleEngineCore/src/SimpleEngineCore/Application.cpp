@@ -206,9 +206,9 @@ namespace SimpleEngine {
 		PointLight pointLight(
 			point_light_position, light_ambient_factor, light_diffuse_factor, light_specular_factor,
 			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity);
-		cube->draw(camera, dirLight, pointLight, glm::vec3(cube_scale_factor));
+		cube->draw(camera, dirLight, useDirectionalLight, pointLight, usePointLight, useSpotLight, glm::vec3(cube_scale_factor));
 		lightCube->draw(camera, pointLight);
-		groundCube->draw(camera, dirLight, pointLight, glm::vec3{ 50, 50, 1 });
+		groundCube->draw(camera, dirLight, useDirectionalLight, pointLight, usePointLight, useSpotLight, glm::vec3{ 50, 50, 1 });
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

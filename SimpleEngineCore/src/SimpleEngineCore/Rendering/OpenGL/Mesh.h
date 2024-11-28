@@ -156,7 +156,7 @@ namespace SimpleEngine {
 			}
 		}
 
-		void draw(Camera& camera, const DirectionalLight& dirLight, const PointLight& pointLight, const glm::vec3 scale_factor)
+		void draw(Camera& camera, const DirectionalLight& dirLight, bool useDirLight, const PointLight& pointLight, bool usePointLight, bool useSpotLight, const glm::vec3 scale_factor)
 		{
 			p_shader_program->bind();
 
@@ -199,10 +199,14 @@ namespace SimpleEngine {
 			// Cam 
 			p_shader_program->set_vec3("cam_pos", camera.get_camera_pos());
 
+			// Use light
+			p_shader_program->set_int("useDirLight", useDirLight);
+			p_shader_program->set_int("usePointLight", usePointLight);
+			p_shader_program->set_int("useSpotLight", useSpotLight);
+
+			// material
 			material.UseMaterial(
 				p_shader_program->get_uniform_location("material.ambient"),
-				//p_shader_program->get_uniform_location("material.diffuse"),
-				//p_shader_program->get_uniform_location("material.specular"),
 				p_shader_program->get_uniform_location("material.shininess"));
 
 			// draw cubes
