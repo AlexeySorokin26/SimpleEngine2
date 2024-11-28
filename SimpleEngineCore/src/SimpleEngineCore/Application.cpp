@@ -25,7 +25,7 @@
 
 #include <glm/vec3.hpp>
 
-std::vector<GLfloat> vertices = {
+std::vector<GLfloat> verticesCube = {
 	//    position             normal            UV                  index
 	// FRONT
 	-1.0f, -1.f, -1.f,    -1.f,  0.f,  0.f,     0.f, 0.f,              // 0
@@ -59,7 +59,7 @@ std::vector<GLfloat> vertices = {
 	   1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 0.f,              // 23
 };
 
-std::vector<GLuint> indices = {
+std::vector<GLuint> indicesCube = {
 	0,   1,  2,  2,  3,  0, // front
 	4,   5,  6,  6,  7,  4, // back
 	8,   9, 10, 10, 11,  8, // right
@@ -73,6 +73,8 @@ namespace SimpleEngine {
 	std::unique_ptr<Cube> cube;
 	std::unique_ptr<LightCube> lightCube;
 	std::unique_ptr<Cube> groundCube;
+
+	std::unique_ptr<Cube> directionalLightCube;
 
 	Application::Application() {
 		LOG_INFO("Starting Application");
@@ -158,14 +160,26 @@ namespace SimpleEngine {
 				glm::vec3{ -2.f, -2.f, 4.f },
 				cubeDiffuseTexturePath.string(),
 				cubeSpecularTexturePath.string(),
-				vertices,
-				indices
+				verticesCube,
+				indicesCube
+			);
+		}
+
+		// Directional light cube (to immitate it)
+		{
+			directionalLightCube = std::make_unique<Cube>(
+				Material(glm::vec3(1), 0),
+				glm::vec3{ 0.f, 0.f, 10.f },
+				"",
+				"",
+				verticesCube,
+				indicesCube
 			);
 		}
 
 		// Light cube 
 		{
-			lightCube = std::make_unique<LightCube>(vertices, indices);
+			lightCube = std::make_unique<LightCube>(verticesCube, indicesCube);
 		}
 
 		// Ground cube 
@@ -175,8 +189,8 @@ namespace SimpleEngine {
 				glm::vec3{ 0,0,-2 },
 				groundCubeTexturePath.string(),
 				"",
-				vertices,
-				indices
+				verticesCube,
+				indicesCube
 			);
 		}
 
@@ -206,9 +220,25 @@ namespace SimpleEngine {
 		PointLight pointLight(
 			point_light_position, light_ambient_factor, light_diffuse_factor, light_specular_factor,
 			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity);
-		cube->draw(camera, dirLight, useDirectionalLight, pointLight, usePointLight, useSpotLight, glm::vec3(cube_scale_factor));
+		cube->draw(camera,
+			dirLight, useDirectionalLight,
+			pointLight, usePointLight,
+			useSpotLight,
+			glm::vec3(0), glm::vec3(cube_scale_factor)
+		);
+		directionalLightCube->draw(camera,
+			dirLight, false,
+			pointLight, false,
+			false,
+			dirLight.direction, glm::vec3(0.1, 0.1, 0.5)
+		);
 		lightCube->draw(camera, pointLight);
-		groundCube->draw(camera, dirLight, useDirectionalLight, pointLight, usePointLight, useSpotLight, glm::vec3{ 50, 50, 1 });
+		groundCube->draw(camera,
+			dirLight, useDirectionalLight,
+			pointLight, usePointLight,
+			useSpotLight,
+			glm::vec3(0), glm::vec3{ 50, 50, 1 }
+		);
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

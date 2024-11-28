@@ -5,7 +5,7 @@ layout(location = 1) in vec3 vertex_normal;
 layout(location = 2) in vec2 texture_coord;
 
 uniform mat4 m_mat;
-uniform mat3 normal_mat; // todo derive it
+uniform mat3 normal_mat; 
 uniform mat4 mvp_mat;
 
 out vec3 frag_pos;

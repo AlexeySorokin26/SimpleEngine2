@@ -34,6 +34,7 @@ namespace SimpleEngine {
 			: std::runtime_error(message) {}
 	};
 
+
 	class LightCube {
 	public:
 		LightCube(const std::vector<GLfloat> vertices, const std::vector<GLuint> indices)
@@ -156,7 +157,12 @@ namespace SimpleEngine {
 			}
 		}
 
-		void draw(Camera& camera, const DirectionalLight& dirLight, bool useDirLight, const PointLight& pointLight, bool usePointLight, bool useSpotLight, const glm::vec3 scale_factor)
+		void draw(Camera& camera,
+			const DirectionalLight& dirLight, bool useDirLight,
+			const PointLight& pointLight, bool usePointLight,
+			bool useSpotLight,
+			const glm::vec3 dirVector,
+			const glm::vec3 scale_factor)
 		{
 			p_shader_program->bind();
 
@@ -211,6 +217,18 @@ namespace SimpleEngine {
 
 			// draw cubes
 			{
+				glm::mat4 rotateMat = glm::mat4(1.0f);  // Identity matrix
+				if (dirVector != glm::vec3(0)) {
+					glm::vec3 lightDirection = glm::normalize(dirVector);
+
+					// Create a forward vector (this is the default "forward" direction of the rectangle, usually the Z-axis)
+					glm::vec3 forward = glm::vec3(0.0f, 0.0f, 1.0f);
+
+					// Find the rotation that aligns the forward vector with the light direction using glm::lookAt
+					glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);  // World-up vector to avoid roll issues
+					rotateMat = glm::mat4(1.0f);
+					rotateMat = glm::lookAt(glm::vec3(0.0f), lightDirection, up);
+				}
 				glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), scale_factor);
 				glm::mat4 translate_mat(
 					1, 0, 0, 0,
@@ -219,7 +237,7 @@ namespace SimpleEngine {
 					position[0], position[1], position[2], 1);
 
 				const glm::mat4 m_mat =
-					translate_mat * scale_mat;
+					translate_mat * rotateMat * scale_mat;
 				p_shader_program->set_matrix4("m_mat", m_mat);
 
 				const glm::mat4 normal_mat =
