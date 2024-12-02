@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 #include <glad/glad.h>
 
 namespace SimpleEngine {
@@ -108,4 +109,43 @@ namespace SimpleEngine {
 		float quadratic;
 	};
 
+	class SpotLight : public PointLight {
+	public:
+		SpotLight(
+			const glm::vec3& position = glm::vec3(0.0f, 1.0f, 0.0f),
+			const glm::vec3& direction = glm::vec3(0.0f, 1.0f, 0.0f),
+			const glm::vec3& ambient = glm::vec3(1.0f, 1.0f, 1.0f),
+			const glm::vec3& diffuse = glm::vec3(1.0f, 1.0f, 1.0f),
+			const glm::vec3& specular = glm::vec3(1.0f, 1.0f, 1.0f),
+			float ambientIntensity = 0.1f,
+			float diffuseIntensity = 0.4f,
+			float specularIntensity = 0.6f,
+			float constant = 1.0f,
+			float linear = 0.09f,
+			float quadratic = 0.032f,
+			float cutOff = 15.f
+		)
+			: PointLight(position, ambient, diffuse, specular, ambientIntensity, diffuseIntensity, specularIntensity, constant, linear, quadratic),
+			direction(direction), cutOff(cutOff)
+		{
+		}
+
+		void UseLight(
+			GLint ambientLoc, GLint diffuseLoc, GLint specularLoc,
+			GLint positionLoc, GLint directionLoc, 
+			GLint ambientIntensityLoc, GLint diffuseIntensityLoc, GLint specularIntensityLoc,
+			GLint constantLoc, GLint linearLoc, GLint quadraticLoc,
+			GLint cutOffLoc
+		) const {
+			PointLight::UseLight(
+				ambientLoc, diffuseLoc, specularLoc,
+				positionLoc, ambientIntensityLoc, diffuseIntensityLoc, specularIntensityLoc,
+				constantLoc, linearLoc, quadraticLoc);
+			glUniform3f(directionLoc, direction.x, direction.y, direction.z);
+			glUniform1f(cutOffLoc, glm::cos(glm::radians(cutOff)));
+		}
+
+		glm::vec3 direction;
+		float cutOff; // in grad 
+	};
 }

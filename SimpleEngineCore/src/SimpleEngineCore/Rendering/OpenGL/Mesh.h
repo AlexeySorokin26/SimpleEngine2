@@ -160,7 +160,7 @@ namespace SimpleEngine {
 		void draw(Camera& camera,
 			const DirectionalLight& dirLight, bool useDirLight,
 			const PointLight& pointLight, bool usePointLight,
-			bool useSpotLight,
+			const SpotLight& spotLight, bool useSpotLight,
 			const glm::vec3 dirVector,
 			const glm::vec3 scale_factor)
 		{
@@ -202,6 +202,21 @@ namespace SimpleEngine {
 				p_shader_program->get_uniform_location("pointLight.quadratic")
 			);
 
+			spotLight.UseLight(
+				p_shader_program->get_uniform_location("spotLight.ambient"),
+				p_shader_program->get_uniform_location("spotLight.diffuse"),
+				p_shader_program->get_uniform_location("spotLight.specular"),
+				p_shader_program->get_uniform_location("spotLight.position"),
+				p_shader_program->get_uniform_location("spotLight.direction"),
+				p_shader_program->get_uniform_location("spotLight.ambientIntensity"),
+				p_shader_program->get_uniform_location("spotLight.diffuseIntensity"),
+				p_shader_program->get_uniform_location("spotLight.specularIntensity"),
+				p_shader_program->get_uniform_location("spotLight.constant"),
+				p_shader_program->get_uniform_location("spotLight.linear"),
+				p_shader_program->get_uniform_location("spotLight.quadratic"),
+				p_shader_program->get_uniform_location("spotLight.cutOff")
+			);
+
 			// Cam 
 			p_shader_program->set_vec3("cam_pos", camera.get_camera_pos());
 
@@ -219,15 +234,23 @@ namespace SimpleEngine {
 			{
 				glm::mat4 rotateMat = glm::mat4(1.0f);  // Identity matrix
 				if (dirVector != glm::vec3(0)) {
+					// Normalize the light direction
 					glm::vec3 lightDirection = glm::normalize(dirVector);
 
-					// Create a forward vector (this is the default "forward" direction of the rectangle, usually the Z-axis)
+					// Define the forward vector of the rectangle (usually along the Z-axis)
 					glm::vec3 forward = glm::vec3(0.0f, 0.0f, 1.0f);
 
-					// Find the rotation that aligns the forward vector with the light direction using glm::lookAt
-					glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);  // World-up vector to avoid roll issues
-					rotateMat = glm::mat4(1.0f);
-					rotateMat = glm::lookAt(glm::vec3(0.0f), lightDirection, up);
+					// Compute the axis of rotation (cross product)
+					glm::vec3 axis = glm::cross(forward, lightDirection);
+
+					// If the axis is near zero, the vectors are collinear and no rotation is needed
+					if (glm::length(axis) > 0.0f) {
+						// Compute the angle between the two vectors (dot product)
+						float angle = glm::acos(glm::dot(forward, lightDirection));
+
+						// Create the rotation matrix using glm::rotate (which uses axis-angle rotation)
+						rotateMat = glm::rotate(glm::mat4(1.0f), angle, axis);
+					}
 				}
 				glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), scale_factor);
 				glm::mat4 translate_mat(

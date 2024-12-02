@@ -220,23 +220,26 @@ namespace SimpleEngine {
 		PointLight pointLight(
 			point_light_position, light_ambient_factor, light_diffuse_factor, light_specular_factor,
 			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity);
+		SpotLight spotLight(camera.get_camera_pos(), camera.get_camera_direction(),
+			light_ambient_factor, light_diffuse_factor, light_specular_factor,
+			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity); // TODO may use cutoff for testing 
 		cube->draw(camera,
 			dirLight, useDirectionalLight,
 			pointLight, usePointLight,
-			useSpotLight,
+			spotLight, useSpotLight,
 			glm::vec3(0), glm::vec3(cube_scale_factor)
 		);
 		directionalLightCube->draw(camera,
 			dirLight, false,
 			pointLight, false,
-			false,
+			spotLight, false,
 			dirLight.direction, glm::vec3(0.1, 0.1, 0.5)
 		);
 		lightCube->draw(camera, pointLight);
 		groundCube->draw(camera,
 			dirLight, useDirectionalLight,
 			pointLight, usePointLight,
-			useSpotLight,
+			spotLight, useSpotLight,
 			glm::vec3(0), glm::vec3{ 50, 50, 1 }
 		);
 

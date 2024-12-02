@@ -48,6 +48,7 @@ namespace SimpleEngine {
 
 		const glm::vec3& get_camera_pos() const { return m_position; }
 		const glm::vec3& get_camera_rotation() const { return m_rotation; }
+		const glm::vec3& get_camera_direction() const { return m_direction; }
 
 		// movement_delta.x - forward, movement_delta.y - right, movement_delta.z - up
 		// rotation_delta.x - roll, rotation_delta.y - pitch, rotation_delta.z - yaw
