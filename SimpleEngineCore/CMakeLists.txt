@@ -110,8 +110,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 add_subdirectory(../external/glm ${CMAKE_CURRENT_BINARY_DIR}/glm)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm)
 
-#add_subdirectory(../external/assimp ${CMAKE_CURRENT_BINARY_DIR}/assimp)
-#target_link_libraries(${PROJECT_NAME} PRIVATE assimp)
+add_subdirectory(../external/assimp ${CMAKE_CURRENT_BINARY_DIR}/assimp)
+target_link_libraries(${PROJECT_NAME} PRIVATE assimp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ../external/stb)
 
