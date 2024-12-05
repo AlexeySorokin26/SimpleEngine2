@@ -156,21 +156,23 @@ namespace SimpleEngine {
 			});
 
 		// Textures paths
-		std::filesystem::path cubeDiffuseTexturePath = getBasePath() / "textures" / "containerDiffuse.png";
-		std::filesystem::path cubeSpecularTexturePath = getBasePath() / "textures" / "containerSpecular.png";
-		std::filesystem::path groundCubeTexturePath = getBasePath() / "textures" / "dirt.png";
+		std::filesystem::path cubeDiffuseTexturePath = getBasePath() / "textures" / "material.diffuse.png";
+		std::filesystem::path cubeSpecularTexturePath = getBasePath() / "textures" / "material.specular.png";
+		std::vector<std::filesystem::path> v_texturePaths;
+		v_texturePaths.push_back(cubeDiffuseTexturePath);
+		v_texturePaths.push_back(cubeSpecularTexturePath);
 		// Cube with 2 textures
 		{
 			std::filesystem::path shaderPath = getBasePath() / "shaders";
 			std::filesystem::path vertex_shader_path = shaderPath / "phong_cube_vertex_shader.glsl";
 			std::filesystem::path frag_shader_path = shaderPath / "phong_cube_fragment_shader.glsl";
+
 			cube = std::make_unique<Cube>(
 				Material(),
 				vertex_shader_path,
 				frag_shader_path,
 				glm::vec3{ -2.f, -2.f, 4.f },
-				cubeDiffuseTexturePath.string(),
-				cubeSpecularTexturePath.string(),
+				v_texturePaths,
 				verticesCube,
 				indicesCube
 			);
@@ -181,13 +183,13 @@ namespace SimpleEngine {
 			std::filesystem::path shaderPath = getBasePath() / "shaders";
 			std::filesystem::path vertex_shader_path = shaderPath / "phong_cube_vertex_shader.glsl";
 			std::filesystem::path frag_shader_path = shaderPath / "phong_cube_fragment_shader.glsl";
+			std::vector<std::filesystem::path> v_texturePathsEmpty;
 			directionalLightCube = std::make_unique<Cube>(
 				Material(glm::vec3(1), 0),
 				vertex_shader_path,
 				frag_shader_path,
 				glm::vec3{ 0.f, 0.f, 10.f },
-				"",
-				"",
+				v_texturePathsEmpty,
 				verticesCube,
 				indicesCube
 			);
@@ -207,13 +209,14 @@ namespace SimpleEngine {
 			std::filesystem::path shaderPath = getBasePath() / "shaders";
 			std::filesystem::path vertex_shader_path = shaderPath / "phong_cube_vertex_shader.glsl";
 			std::filesystem::path frag_shader_path = shaderPath / "phong_cube_fragment_shader.glsl";
+			//std::filesystem::path groundCubeTexturePath = getBasePath() / "textures" / "dirt.png";
+			//std::vector<std::filesystem::path> v_texturePaths;
 			groundCube = std::make_unique<Cube>(
 				Material(),
 				vertex_shader_path,
 				frag_shader_path,
 				glm::vec3{ 0,0,-2 },
-				groundCubeTexturePath.string(),
-				"",
+				v_texturePaths,
 				verticesCube,
 				indicesCube
 			);

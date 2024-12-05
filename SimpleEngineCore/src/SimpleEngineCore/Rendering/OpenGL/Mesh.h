@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <cmath>
 #include <vector>
+#include <map>
 #include <cstring>  // for memcpy
 
 #include "SimpleEngineCore/Rendering/OpenGL/VertexBuffer.h"
@@ -35,25 +36,31 @@ namespace SimpleEngine {
 			: std::runtime_error(message) {}
 	};
 
-	struct Vertex {
-		glm::vec3 Position;
-		glm::vec3 Normal;
-		glm::vec2 TexCoords;
-	};
+	//struct Vertex {
+	//	glm::vec3 Position;
+	//	glm::vec3 Normal;
+	//	glm::vec2 TexCoords;
+	//};
 
 	class Mesh {
 	public:
 		Mesh(
 			std::vector<GLfloat> vertices,
-			std::vector<GLuint> indices/*,
-			std::vector<Texture> textures*/,
-			std::filesystem::path vertex_shader_path, std::filesystem::path frag_shader_path) :
-			vertices(vertices), indices(indices)/*, textures(textures)*/
+			std::vector<GLuint> indices,
+			std::filesystem::path vertex_shader_path, std::filesystem::path frag_shader_path,
+			std::vector<std::filesystem::path> v_texturePaths = {}) :
+			vertices(vertices), indices(indices)/*, m_texture(m_texture)*/
 		{
 			p_shader_program = std::make_unique<ShaderProgram>(
 				vertex_shader_path.string(), frag_shader_path.string());
 			if (!p_shader_program->is_compiled())
 				throw ShaderCompilationException("Shader compilation failed");
+			for (const auto& tp : v_texturePaths) {
+				const unsigned int w = 1000;
+				const unsigned int h = 1000;
+				auto t = tp.stem().string();
+				m_texture.emplace(std::make_pair(tp.stem().string(), Texture2D(tp.string(), w, h)));
+			}
 			SetupMesh();
 		}
 		//virtual void Draw(std::unique_ptr<ShaderProgram> p_shader_program) {
@@ -88,11 +95,10 @@ namespace SimpleEngine {
 		std::unique_ptr<VertexArray> p_vao;
 		std::unique_ptr<VertexBuffer> p_vbo;
 		std::unique_ptr<IndexBuffer> p_index_buffer;
-		//std::vector<Texture2D> p_texture;
+		std::map<std::string, Texture2D> m_texture;
 		// mesh data
 		std::vector<GLfloat> vertices;
 		std::vector<GLuint> indices;
-		//std::vector<Texture> textures;
 	};
 
 	class LightCube : public Mesh {
@@ -136,24 +142,12 @@ namespace SimpleEngine {
 		Cube(const Material& material,
 			std::filesystem::path vertex_shader_path = "", std::filesystem::path frag_shader_path = "",
 			glm::vec3 position = glm::vec3{ -2.f, -2.f, 40.f },
-			const std::string& texturePath = "",
-			const std::string& texturePath1 = "",
+			std::vector<std::filesystem::path> v_texture = {},
 			const std::vector<GLfloat>& vertices = {},
 			const std::vector<GLuint>& indices = {})
-			: Mesh(vertices, indices, vertex_shader_path, frag_shader_path),
+			: Mesh(vertices, indices, vertex_shader_path, frag_shader_path, v_texture),
 			material(material), position(position)
 		{
-			if (!texturePath.empty()) {
-				const unsigned int w = 1000;
-				const unsigned int h = 1000;
-				p_texture = std::make_unique<Texture2D>(texturePath, w, h);
-			}
-
-			if (!texturePath1.empty()) {
-				const unsigned int w = 1000;
-				const unsigned int h = 1000;
-				p_texture1 = std::make_unique<Texture2D>(texturePath1, w, h);
-			}
 		}
 
 		void draw(Camera& camera,
@@ -166,14 +160,15 @@ namespace SimpleEngine {
 			p_shader_program->bind();
 
 			// Textures
-			if (p_texture) {
+			auto it = m_texture.find("material.diffuse");
+			if (it != m_texture.end()) {
 				p_shader_program->set_int("material.diffuse", 0);
-				p_texture->bind(0);
+				it->second.bind(0);
 			}
-
-			if (p_texture1) {
-				p_shader_program->set_int("material.specular", 1);
-				p_texture1->bind(1);
+			auto it1 = m_texture.find("material.specular");
+			if (it != m_texture.end()) {
+				p_shader_program->set_int("material.specular", 0);
+				it->second.bind(1);
 			}
 
 			p_shader_program->set_vec3("globalAmbient", glm::vec3{ 0.2,0.2,0.2 });
@@ -276,8 +271,6 @@ namespace SimpleEngine {
 
 	private:
 		Material material;
-		std::unique_ptr<Texture2D> p_texture;
-		std::unique_ptr<Texture2D> p_texture1;
 
 		glm::vec3 position;
 	};
