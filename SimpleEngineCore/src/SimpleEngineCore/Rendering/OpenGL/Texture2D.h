@@ -1,8 +1,8 @@
 #pragma once
 
-#include "stb_image.h"
-
 #include <string>
+
+#include "stb_image.h"
 
 namespace SimpleEngine {
 

@@ -185,7 +185,11 @@ namespace SimpleEngine {
 
 		// Light cube 
 		{
-			lightCube = std::make_unique<LightCube>(verticesCube, indicesCube);
+			std::filesystem::path shaderPath = getBasePath() / "shaders";
+			std::filesystem::path vertex_shader_path = shaderPath / "light_cube_vertex_shader.glsl";
+			std::filesystem::path frag_shader_path = shaderPath / "light_cube_fragment_shader.glsl";
+			lightCube = std::make_unique<LightCube>(
+				verticesCube, indicesCube, vertex_shader_path, frag_shader_path);
 		}
 
 		// Ground cube 

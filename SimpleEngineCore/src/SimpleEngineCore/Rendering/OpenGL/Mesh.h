@@ -5,6 +5,7 @@
 #include <array>
 #include <filesystem>
 #include <cmath>
+#include <vector>
 #include <cstring>  // for memcpy
 
 #include "SimpleEngineCore/Rendering/OpenGL/VertexBuffer.h"
@@ -34,30 +35,43 @@ namespace SimpleEngine {
 			: std::runtime_error(message) {}
 	};
 
+	struct Vertex {
+		glm::vec3 Position;
+		glm::vec3 Normal;
+		glm::vec2 TexCoords;
+	};
 
-	class LightCube {
+	class Mesh {
 	public:
-		LightCube(const std::vector<GLfloat> vertices, const std::vector<GLuint> indices)
+		Mesh(
+			std::vector<GLfloat> vertices,
+			std::vector<GLuint> indices/*,
+			std::vector<Texture> textures*/,
+			std::filesystem::path vertex_shader_path, std::filesystem::path frag_shader_path) :
+			vertices(vertices), indices(indices)/*, textures(textures)*/
 		{
-			std::filesystem::path shaderPath = getBasePath() / "shaders";
-			std::filesystem::path vertex_shader_name = shaderPath / "light_cube_vertex_shader.glsl";
-			std::filesystem::path frag_shader_name = shaderPath / "light_cube_fragment_shader.glsl";
 			p_shader_program = std::make_unique<ShaderProgram>(
-				vertex_shader_name.string(), frag_shader_name.string());
+				vertex_shader_path.string(), frag_shader_path.string());
 			if (!p_shader_program->is_compiled())
 				throw ShaderCompilationException("Shader compilation failed");
+			SetupMesh();
+		}
+		//virtual void Draw(std::unique_ptr<ShaderProgram> p_shader_program) {
+		//	p_shader_program->bind();
+		//}
+
+	private:
+		void SetupMesh() {
 			// VAO
 			p_vao = std::make_unique<VertexArray>();
 			p_vao->bind();
-
-			// todo it works only for cube for now
+			// Depends on struct Vertex 
 			BufferLayout buffer_layout_vec3_vec3_vec2
 			{
 				ShaderDataType::Float3,
 				ShaderDataType::Float3,
 				ShaderDataType::Float2
 			};
-
 			// VBO
 			if (sizeof(vertices) > 0) {
 				p_vbo = std::make_unique<VertexBuffer>(vertices.data(), vertices.size() * sizeof(GLfloat), buffer_layout_vec3_vec3_vec2);
@@ -68,6 +82,25 @@ namespace SimpleEngine {
 				p_index_buffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());
 				p_vao->set_index_buffer(*p_index_buffer);
 			}
+		}
+	protected:
+		std::unique_ptr<ShaderProgram> p_shader_program;
+		std::unique_ptr<VertexArray> p_vao;
+		std::unique_ptr<VertexBuffer> p_vbo;
+		std::unique_ptr<IndexBuffer> p_index_buffer;
+		//std::vector<Texture2D> p_texture;
+		// mesh data
+		std::vector<GLfloat> vertices;
+		std::vector<GLuint> indices;
+		//std::vector<Texture> textures;
+	};
+
+	class LightCube : public Mesh {
+	public:
+		LightCube(const std::vector<GLfloat> vertices, const std::vector<GLuint> indices,
+			std::filesystem::path vertex_shader_path, std::filesystem::path frag_shader_path) :
+			Mesh(vertices, indices, vertex_shader_path, frag_shader_path)
+		{
 		}
 		void draw(Camera& camera, const PointLight& light) {
 			p_shader_program->bind();
@@ -96,11 +129,6 @@ namespace SimpleEngine {
 				Renderer_OpenGL::draw(*p_vao);
 			}
 		}
-	private:
-		std::unique_ptr<ShaderProgram> p_shader_program;
-		std::unique_ptr<VertexArray> p_vao;
-		std::unique_ptr<VertexBuffer> p_vbo;
-		std::unique_ptr<IndexBuffer> p_index_buffer;
 	};
 
 	class Cube {
