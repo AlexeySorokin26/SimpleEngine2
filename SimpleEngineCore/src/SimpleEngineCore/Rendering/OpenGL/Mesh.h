@@ -131,47 +131,18 @@ namespace SimpleEngine {
 		}
 	};
 
-	class Cube {
+	class Cube : public Mesh {
 	public:
 		Cube(const Material& material,
+			std::filesystem::path vertex_shader_path = "", std::filesystem::path frag_shader_path = "",
 			glm::vec3 position = glm::vec3{ -2.f, -2.f, 40.f },
 			const std::string& texturePath = "",
 			const std::string& texturePath1 = "",
 			const std::vector<GLfloat>& vertices = {},
 			const std::vector<GLuint>& indices = {})
-			: material(material), position(position), vertices(vertices), indices(indices)
+			: Mesh(vertices, indices, vertex_shader_path, frag_shader_path),
+			material(material), position(position)
 		{
-			std::filesystem::path shaderPath = getBasePath() / "shaders";
-			std::filesystem::path vertex_shader_name = shaderPath / "phong_cube_vertex_shader.glsl";
-			std::filesystem::path frag_shader_name = shaderPath / "phong_cube_fragment_shader.glsl";
-			p_shader_program = std::make_unique<ShaderProgram>(
-				vertex_shader_name.string(), frag_shader_name.string());
-
-			if (!p_shader_program->is_compiled())
-				throw ShaderCompilationException("Shader compilation failed");
-
-			// VAO
-			p_vao = std::make_unique<VertexArray>();
-			p_vao->bind();
-
-			BufferLayout buffer_layout_vec3_vec3_vec2{
-				ShaderDataType::Float3,
-				ShaderDataType::Float3,
-				ShaderDataType::Float2
-			};
-
-			// VBO
-			if (!vertices.empty()) {
-				p_vbo = std::make_unique<VertexBuffer>(vertices.data(), vertices.size() * sizeof(GLfloat), buffer_layout_vec3_vec3_vec2);
-				p_vao->add_vertex_buffer(*p_vbo);
-			}
-
-			// INDEX BUFFER
-			if (!indices.empty()) {
-				p_index_buffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());
-				p_vao->set_index_buffer(*p_index_buffer);
-			}
-
 			if (!texturePath.empty()) {
 				const unsigned int w = 1000;
 				const unsigned int h = 1000;
@@ -305,16 +276,10 @@ namespace SimpleEngine {
 
 	private:
 		Material material;
-		std::unique_ptr<ShaderProgram> p_shader_program;
-		std::unique_ptr<VertexArray> p_vao;
-		std::unique_ptr<VertexBuffer> p_vbo;
-		std::unique_ptr<IndexBuffer> p_index_buffer;
 		std::unique_ptr<Texture2D> p_texture;
 		std::unique_ptr<Texture2D> p_texture1;
 
 		glm::vec3 position;
-		std::vector<GLfloat> vertices;
-		std::vector<GLuint> indices;
 	};
 
 
