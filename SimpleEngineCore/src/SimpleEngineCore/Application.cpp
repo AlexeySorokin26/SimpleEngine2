@@ -25,12 +25,6 @@
 
 #include <glm/vec3.hpp>
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
-Assimp::Importer importer;
-
 std::vector<GLfloat> verticesCube = {
 	//    position             normal            UV                  index
 	// FRONT

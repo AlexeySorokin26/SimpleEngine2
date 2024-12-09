@@ -27,6 +27,10 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 
 namespace SimpleEngine {
 
@@ -58,7 +62,6 @@ namespace SimpleEngine {
 			for (const auto& tp : v_texturePaths) {
 				const unsigned int w = 1000;
 				const unsigned int h = 1000;
-				auto t = tp.stem().string();
 				m_texture.emplace(std::make_pair(tp.stem().string(), Texture2D(tp.string(), w, h)));
 			}
 			SetupMesh();
@@ -99,6 +102,31 @@ namespace SimpleEngine {
 		// mesh data
 		std::vector<GLfloat> vertices;
 		std::vector<GLuint> indices;
+	};
+
+
+	class Model {
+	public:
+		Model(std::filesystem::path path = "") {
+			LoadModel(path.string());
+		}
+	private:
+		std::vector<Mesh> meshes;
+		std::string directory;
+
+		void LoadModel(std::string path) {
+
+		}
+		void ProcessNode(aiNode* node, const aiScene* scene) {
+
+		}
+		/*Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene) {
+
+		}*/
+		std::vector<Texture2D> LoadMaterialTextures(aiMaterial* mat,
+			aiTextureType type, std::string typeName) {
+
+		}
 	};
 
 	class LightCube : public Mesh {
