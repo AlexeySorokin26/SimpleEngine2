@@ -149,6 +149,16 @@ namespace SimpleEngine {
 				m_event_dispatcher.dispatch(event);
 			});
 
+		DirectionalLight dirLight(
+			directional_light_direction, light_ambient_factor, light_diffuse_factor, light_specular_factor,
+			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity);
+		PointLight pointLight(
+			point_light_position, light_ambient_factor, light_diffuse_factor, light_specular_factor,
+			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity);
+		SpotLight spotLight(camera.get_camera_pos(), camera.get_camera_direction(),
+			light_ambient_factor, light_diffuse_factor, light_specular_factor,
+			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity);
+
 		// Textures paths
 		std::filesystem::path cubeDiffuseTexturePath = getBasePath() / "textures" / "material.diffuse.png";
 		std::filesystem::path cubeSpecularTexturePath = getBasePath() / "textures" / "material.specular.png";
@@ -168,7 +178,12 @@ namespace SimpleEngine {
 				glm::vec3{ -2.f, -2.f, 4.f },
 				v_texturePaths,
 				verticesCube,
-				indicesCube
+				indicesCube,
+				camera,
+				dirLight, useDirectionalLight,
+				pointLight, usePointLight,
+				spotLight, useSpotLight,
+				glm::vec3(0), glm::vec3(cube_scale_factor)
 			);
 		}
 
@@ -185,7 +200,12 @@ namespace SimpleEngine {
 				glm::vec3{ 0.f, 0.f, 10.f },
 				v_texturePathsEmpty,
 				verticesCube,
-				indicesCube
+				indicesCube,
+				camera,
+				dirLight, false,
+				pointLight, false,
+				spotLight, false,
+				dirLight.direction, glm::vec3(0.1, 0.1, 0.5)
 			);
 		}
 
@@ -195,7 +215,10 @@ namespace SimpleEngine {
 			std::filesystem::path vertex_shader_path = shaderPath / "light_cube_vertex_shader.glsl";
 			std::filesystem::path frag_shader_path = shaderPath / "light_cube_fragment_shader.glsl";
 			lightCube = std::make_unique<LightCube>(
-				verticesCube, indicesCube, vertex_shader_path, frag_shader_path);
+				verticesCube, indicesCube,
+				vertex_shader_path, frag_shader_path,
+				camera, pointLight
+			);
 		}
 
 		// Ground cube 
@@ -212,7 +235,11 @@ namespace SimpleEngine {
 				glm::vec3{ 0,0,-2 },
 				v_texturePaths,
 				verticesCube,
-				indicesCube
+				indicesCube, camera,
+				dirLight, useDirectionalLight,
+				pointLight, usePointLight,
+				spotLight, useSpotLight,
+				glm::vec3(0), glm::vec3{ 50, 50, 1 }
 			);
 		}
 
@@ -244,26 +271,32 @@ namespace SimpleEngine {
 			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity);
 		SpotLight spotLight(camera.get_camera_pos(), camera.get_camera_direction(),
 			light_ambient_factor, light_diffuse_factor, light_specular_factor,
-			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity); // TODO may use cutoff for testing 
-		cube->draw(camera,
+			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity);
+
+		cube->UpdateLight(
 			dirLight, useDirectionalLight,
 			pointLight, usePointLight,
-			spotLight, useSpotLight,
-			glm::vec3(0), glm::vec3(cube_scale_factor)
+			spotLight, useSpotLight
 		);
-		directionalLightCube->draw(camera,
-			dirLight, false,
-			pointLight, false,
-			spotLight, false,
-			dirLight.direction, glm::vec3(0.1, 0.1, 0.5)
-		);
-		lightCube->draw(camera, pointLight);
-		groundCube->draw(camera,
+		cube->UpdateCamera(camera);
+		cube->Draw();
+
+		directionalLightCube->UpdateDirVector(dirLight.direction);
+		directionalLightCube->UpdateCamera(camera);
+		directionalLightCube->Draw();
+
+		lightCube->UpdateLight(pointLight);
+		lightCube->UpdateCamera(camera);
+		lightCube->Draw();
+
+
+		groundCube->UpdateLight(
 			dirLight, useDirectionalLight,
 			pointLight, usePointLight,
-			spotLight, useSpotLight,
-			glm::vec3(0), glm::vec3{ 50, 50, 1 }
+			spotLight, useSpotLight
 		);
+		groundCube->UpdateCamera(camera);
+		groundCube->Draw();
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

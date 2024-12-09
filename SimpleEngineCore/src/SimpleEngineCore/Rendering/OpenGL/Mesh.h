@@ -49,10 +49,12 @@ namespace SimpleEngine {
 	class Mesh {
 	public:
 		Mesh(
+			Camera camera,
 			std::vector<GLfloat> vertices,
 			std::vector<GLuint> indices,
 			std::filesystem::path vertex_shader_path, std::filesystem::path frag_shader_path,
 			std::vector<std::filesystem::path> v_texturePaths = {}) :
+			camera(camera),
 			vertices(vertices), indices(indices)/*, m_texture(m_texture)*/
 		{
 			p_shader_program = std::make_unique<ShaderProgram>(
@@ -66,9 +68,11 @@ namespace SimpleEngine {
 			}
 			SetupMesh();
 		}
-		//virtual void Draw(std::unique_ptr<ShaderProgram> p_shader_program) {
-		//	p_shader_program->bind();
-		//}
+		virtual void Draw() = 0;
+
+		void UpdateCamera(const Camera& cam) {
+			this->camera = cam;
+		}
 
 	private:
 		void SetupMesh() {
@@ -102,6 +106,7 @@ namespace SimpleEngine {
 		// mesh data
 		std::vector<GLfloat> vertices;
 		std::vector<GLuint> indices;
+		Camera camera;
 	};
 
 
@@ -132,11 +137,16 @@ namespace SimpleEngine {
 	class LightCube : public Mesh {
 	public:
 		LightCube(const std::vector<GLfloat> vertices, const std::vector<GLuint> indices,
-			std::filesystem::path vertex_shader_path, std::filesystem::path frag_shader_path) :
-			Mesh(vertices, indices, vertex_shader_path, frag_shader_path)
+			std::filesystem::path vertex_shader_path, std::filesystem::path frag_shader_path,
+			const Camera& camera, const PointLight& light) :
+			Mesh(camera, vertices, indices, vertex_shader_path, frag_shader_path),
+			light(light)
 		{
 		}
-		void draw(Camera& camera, const PointLight& light) {
+		void UpdateLight(const PointLight& light) {
+			this->light = light;
+		}
+		void Draw() {
 			p_shader_program->bind();
 
 			// draw light cube
@@ -152,7 +162,7 @@ namespace SimpleEngine {
 				light.UseLight(
 					p_shader_program->get_uniform_location("light_ambient"),
 					p_shader_program->get_uniform_location("light_diffuse"),
-					p_shader_program->get_uniform_location("light_specular"), // TODO rest should be deleted 
+					p_shader_program->get_uniform_location("light_specular"),
 					p_shader_program->get_uniform_location("pointLight.position"),
 					p_shader_program->get_uniform_location("pointLight.ambientIntensity"),
 					p_shader_program->get_uniform_location("pointLight.diffuseIntensity"),
@@ -163,6 +173,8 @@ namespace SimpleEngine {
 				Renderer_OpenGL::draw(*p_vao);
 			}
 		}
+	private:
+		PointLight light;
 	};
 
 	class Cube : public Mesh {
@@ -172,18 +184,43 @@ namespace SimpleEngine {
 			glm::vec3 position = glm::vec3{ -2.f, -2.f, 40.f },
 			std::vector<std::filesystem::path> v_texture = {},
 			const std::vector<GLfloat>& vertices = {},
-			const std::vector<GLuint>& indices = {})
-			: Mesh(vertices, indices, vertex_shader_path, frag_shader_path, v_texture),
+			const std::vector<GLuint>& indices = {},
+			const Camera& camera = Camera(),
+			const DirectionalLight& dirLight = DirectionalLight(), bool useDirLight = false,
+			const PointLight& pointLight = PointLight(), bool usePointLight = false,
+			const SpotLight& spotLight = SpotLight(), bool useSpotLight = false,
+			const glm::vec3 dirVector = glm::vec3(1),
+			const glm::vec3 scale_factor = glm::vec3(1)
+		) : Mesh(camera, vertices, indices, vertex_shader_path, frag_shader_path, v_texture),
+			dirLight(dirLight), useDirLight(useDirLight),
+			pointLight(pointLight), usePointLight(usePointLight),
+			spotLight(spotLight), useSpotLight(useSpotLight),
+			dirVector(dirVector),
+			scale_factor(scale_factor),
 			material(material), position(position)
 		{
 		}
 
-		void draw(Camera& camera,
+		void UpdateLight(
 			const DirectionalLight& dirLight, bool useDirLight,
 			const PointLight& pointLight, bool usePointLight,
-			const SpotLight& spotLight, bool useSpotLight,
-			const glm::vec3 dirVector,
-			const glm::vec3 scale_factor)
+			const SpotLight& spotLight, bool useSpotLight
+		) {
+			this->dirLight = dirLight;
+			this->useDirLight = useDirLight;
+
+			this->pointLight = pointLight;
+			this->usePointLight = usePointLight;
+
+			this->spotLight = spotLight;
+			this->useSpotLight = useSpotLight;
+		}
+
+		void UpdateDirVector(const glm::vec3& dirVector) {
+			this->dirVector = dirVector;
+		}
+
+		void Draw()
 		{
 			p_shader_program->bind();
 
@@ -298,10 +335,15 @@ namespace SimpleEngine {
 		}
 
 	private:
+		DirectionalLight dirLight;
+		bool useDirLight;
+		PointLight pointLight;
+		bool usePointLight;
+		SpotLight spotLight;
+		bool useSpotLight;
+		glm::vec3 dirVector;
+		const glm::vec3 scale_factor;
 		Material material;
-
 		glm::vec3 position;
 	};
-
-
 }
