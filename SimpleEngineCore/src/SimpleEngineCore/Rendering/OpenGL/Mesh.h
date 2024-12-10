@@ -49,7 +49,7 @@ namespace SimpleEngine {
 	class Mesh {
 	public:
 		Mesh(
-			Camera camera,
+			const Camera& camera,
 			std::vector<GLfloat> vertices,
 			std::vector<GLuint> indices,
 			std::filesystem::path vertex_shader_path, std::filesystem::path frag_shader_path,
@@ -157,7 +157,7 @@ namespace SimpleEngine {
 					0, 0, 1, 0,
 					light.position[0], light.position[1], light.position[2], 1);
 				p_shader_program->set_matrix4("mvp_mat",
-					camera.get_projection_matrix() * camera.get_updated_view_matrix() * translate_mat);
+					camera.get_projection_matrix() * camera.get_view_matrix() * translate_mat);
 
 				light.UseLight(
 					p_shader_program->get_uniform_location("light_ambient"),
@@ -327,7 +327,7 @@ namespace SimpleEngine {
 				p_shader_program->set_matrix3("normal_mat", normal_mat);
 
 				const glm::mat4 mvp_mat =
-					camera.get_projection_matrix() * camera.get_updated_view_matrix() * m_mat;
+					camera.get_projection_matrix() * camera.get_view_matrix() * m_mat;
 				p_shader_program->set_matrix4("mvp_mat", mvp_mat);
 
 				Renderer_OpenGL::draw(*p_vao);

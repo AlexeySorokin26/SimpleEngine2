@@ -29,6 +29,7 @@ namespace SimpleEngine {
 		void set_position_rotation(const glm::vec3& position, const glm::vec3& rotation);
 		void set_projection_mode(const ProjectionMode projection_mode);
 		glm::mat4 get_updated_view_matrix();
+		glm::mat4 get_view_matrix() const { return m_view_matrix; }
 		glm::mat4 get_projection_matrix() const { return m_projection_matrix; }
 		void set_far_clip_plane(const float far);
 		void set_near_clip_plane(const float near);
@@ -53,8 +54,12 @@ namespace SimpleEngine {
 		// movement_delta.x - forward, movement_delta.y - right, movement_delta.z - up
 		// rotation_delta.x - roll, rotation_delta.y - pitch, rotation_delta.z - yaw
 		void add_movement_and_rotation(const glm::vec3& movement_delta, const glm::vec3& rotation_delta);
-	private:
+
+		bool if_update_view_matrix() const { return m_update_view_matrix; }
+		void set_update_view_matirx(bool b) { m_update_view_matrix = b; }
 		void update_view_matrix();
+
+	private:
 		void update_projection_matrix();
 		glm::vec3 m_position;
 		glm::vec3 m_rotation; // X - ROLL, Y - PITCH, Z - YAW

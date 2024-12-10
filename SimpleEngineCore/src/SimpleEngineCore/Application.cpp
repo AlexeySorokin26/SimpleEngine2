@@ -273,6 +273,11 @@ namespace SimpleEngine {
 			light_ambient_factor, light_diffuse_factor, light_specular_factor,
 			light_ambient_intensity, light_diffuse_intensity, light_specular_intensity);
 
+		if (camera.if_update_view_matrix()) {
+			camera.update_view_matrix();
+			camera.set_update_view_matirx(false);
+		}
+
 		cube->UpdateLight(
 			dirLight, useDirectionalLight,
 			pointLight, usePointLight,
