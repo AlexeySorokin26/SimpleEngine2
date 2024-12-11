@@ -73,6 +73,7 @@ namespace SimpleEngine {
 	std::unique_ptr<Cube> cube;
 	std::unique_ptr<LightCube> lightCube;
 	std::unique_ptr<Cube> groundCube;
+	Model model;
 
 	std::unique_ptr<Cube> directionalLightCube;
 
@@ -243,6 +244,12 @@ namespace SimpleEngine {
 			);
 		}
 
+		// Model testing
+		{
+			std::filesystem::path shaderPath = getBasePath() / "models";
+			model = Model(shaderPath / "bin.obj");
+		}
+
 		Renderer_OpenGL::enable_depth_testing();
 		while (!m_bCloseWindow) {
 			draw();
@@ -302,6 +309,8 @@ namespace SimpleEngine {
 		);
 		groundCube->UpdateCamera(camera);
 		groundCube->Draw();
+
+		//model->
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();

@@ -112,14 +112,108 @@ namespace SimpleEngine {
 		Camera camera;
 	};
 
+	class MeshNew {
+	public:
+		MeshNew(
+			std::vector<Vertex>&& vertices,
+			std::vector<unsigned int>&& indices,
+			std::map<std::string, Texture2D>&& textures) :
+			vertices(std::move(vertices)), indices(std::move(indices)), textures(std::move(textures)) {
+			SetupMesh();
+		}
+
+		// Explicitly delete the copy constructor and copy assignment operator
+		MeshNew(const MeshNew&) = delete;
+		MeshNew& operator=(const MeshNew&) = delete;
+
+		// Move constructor
+		MeshNew(MeshNew&& other) noexcept
+			: shader_program(std::move(other.shader_program)),
+			vao(std::move(other.vao)),
+			vbo(std::move(other.vbo)),
+			index_buffer(std::move(other.index_buffer)),
+			textures(std::move(other.textures)),
+			vertices(std::move(other.vertices)),
+			indices(std::move(other.indices)),
+			camera(std::move(other.camera)) {
+			// After moving, `other` should not be used except for destruction
+		}
+
+		// Move assignment operator
+		MeshNew& operator=(MeshNew&& other) noexcept {
+			if (this != &other) { // Avoid self-assignment
+				shader_program = std::move(other.shader_program);
+				vao = std::move(other.vao);
+				vbo = std::move(other.vbo);
+				index_buffer = std::move(other.index_buffer);
+				textures = std::move(other.textures);
+				vertices = std::move(other.vertices);
+				indices = std::move(other.indices);
+				camera = std::move(other.camera);
+			}
+			return *this;
+		}
+
+
+		virtual void Draw() {
+		}
+
+		void UpdateCamera(const Camera& cam) {
+			this->camera = cam;
+		}
+		void SetupShaderProgram(std::filesystem::path vertex_shader_path, std::filesystem::path frag_shader_path) {
+			shader_program = std::make_unique<ShaderProgram>(
+				vertex_shader_path.string(), frag_shader_path.string());
+			if (!shader_program->is_compiled())
+				throw ShaderCompilationException("Shader compilation failed");
+		}
+		void SetupMesh() {
+			// VAO
+			vao = std::make_unique <VertexArray>();
+			vao->bind();
+			// Depends on struct Vertex 
+			BufferLayout buffer_layout_vec3_vec3_vec2
+			{
+				ShaderDataType::Float3,
+				ShaderDataType::Float3,
+				ShaderDataType::Float2
+			};
+			// VBO
+			if (sizeof(vertices) > 0) {
+				vbo = std::make_unique <VertexBuffer>(vertices.data(), vertices.size() * sizeof(GLfloat), buffer_layout_vec3_vec3_vec2);
+				vao->add_vertex_buffer(*vbo);
+			}
+			// INDEX BUFFER
+			if (sizeof(indices) > 0) {
+				index_buffer = std::make_unique <IndexBuffer>(indices.data(), indices.size());
+				vao->set_index_buffer(*index_buffer);
+			}
+			// Textures
+			/*for (const auto& tp : v_texturePaths) {
+				const unsigned int w = 1000;
+				const unsigned int h = 1000;
+				m_texture.emplace(std::make_pair(tp.stem().string(), Texture2D(tp.string(), w, h)));
+			}*/
+		}
+	protected:
+		std::unique_ptr <ShaderProgram> shader_program;
+		std::unique_ptr <VertexArray> vao;
+		std::unique_ptr <VertexBuffer> vbo;
+		std::unique_ptr <IndexBuffer> index_buffer;
+		std::map<std::string, Texture2D> textures;
+		// mesh data
+		std::vector<Vertex> vertices;
+		std::vector<GLuint> indices;
+		Camera camera;
+	};
 
 	class Model {
 	public:
 		Model(std::filesystem::path path = "") {
 			LoadModel(path.string());
 		}
+		std::vector<std::unique_ptr<MeshNew>> meshes;
 	private:
-		std::vector<Mesh> meshes;
 		std::string directory;
 
 		void LoadModel(std::string path) {
@@ -141,7 +235,7 @@ namespace SimpleEngine {
 			for (unsigned int i = 0; i < node->mNumMeshes; i++)
 			{
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-				meshes.push_back(ProcessMesh(mesh, scene));
+				meshes.emplace_back(std::make_unique<MeshNew>(ProcessMesh(mesh, scene)));
 			}
 			// then do the same for each of its children
 			for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -149,10 +243,10 @@ namespace SimpleEngine {
 				ProcessNode(node->mChildren[i], scene);
 			}
 		}
-		Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene) {
+		MeshNew ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 			std::vector<Vertex> vertices;
 			std::vector<unsigned int> indices;
-			std::vector<Texture2D> textures;
+			std::map<std::string, Texture2D> textures;
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			{
 				Vertex vertex;
@@ -185,10 +279,10 @@ namespace SimpleEngine {
 			{
 				aiFace face = mesh->mFaces[i];
 				for (unsigned int j = 0; j < face.mNumIndices; j++)
-					indices.push_back(face.mIndices[j]);
+					indices.emplace_back(face.mIndices[j]);
 			}
 			// process material
-			if (mesh->mMaterialIndex >= 0)
+			/*if (mesh->mMaterialIndex >= 0)
 			{
 				aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 				std::vector<Texture2D> diffuseMaps = LoadMaterialTextures(material,
@@ -197,13 +291,13 @@ namespace SimpleEngine {
 				std::vector<Texture2D> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 				textures.insert(textures.end(), specularMaps.begin(),
 					specularMaps.end());
-			}
-			return Mesh(vertices, indices, textures);
+			}*/
+			return MeshNew(std::move(vertices), std::move(indices), std::move(textures));
 		}
 		std::vector<Texture2D> LoadMaterialTextures(aiMaterial* mat,
 			aiTextureType type, std::string typeName) {
 			std::vector<Texture2D> textures;
-			for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+			/*for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 			{
 				aiString str;
 				mat->GetTexture(type, i, &str);
@@ -212,7 +306,7 @@ namespace SimpleEngine {
 				texture.type = typeName;
 				texture.path = str;
 				textures.push_back(texture);
-			}
+			}*/
 			return textures;
 		}
 	};
