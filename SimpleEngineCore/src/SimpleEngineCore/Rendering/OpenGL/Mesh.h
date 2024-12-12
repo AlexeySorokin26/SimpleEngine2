@@ -32,6 +32,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <unordered_map>
+#include <functional>
+
 
 namespace SimpleEngine {
 
@@ -112,6 +115,10 @@ namespace SimpleEngine {
 		Camera camera;
 	};
 
+	enum class MeshType {
+		LightCube
+	};
+
 	class MeshNew {
 	public:
 		MeshNew(
@@ -154,11 +161,13 @@ namespace SimpleEngine {
 			return *this;
 		}
 
-
 		virtual void Draw() {
 		}
 
-		void UpdateCamera(const Camera& cam) {
+		virtual void UpdateLight(const PointLight& light) {
+
+		}
+		virtual void UpdateCamera(const Camera& cam) {
 			this->camera = cam;
 		}
 		void SetupShaderProgram(std::filesystem::path vertex_shader_path, std::filesystem::path frag_shader_path) {
@@ -169,7 +178,7 @@ namespace SimpleEngine {
 		}
 		void SetupMesh() {
 			// VAO
-			vao = std::make_unique <VertexArray>();
+			vao = std::make_unique<VertexArray>();
 			vao->bind();
 			// Depends on struct Vertex 
 			BufferLayout buffer_layout_vec3_vec3_vec2
@@ -180,12 +189,12 @@ namespace SimpleEngine {
 			};
 			// VBO
 			if (sizeof(vertices) > 0) {
-				vbo = std::make_unique <VertexBuffer>(vertices.data(), vertices.size() * sizeof(GLfloat), buffer_layout_vec3_vec3_vec2);
+				vbo = std::make_unique<VertexBuffer>(vertices.data(), vertices.size() * sizeof(GLfloat), buffer_layout_vec3_vec3_vec2);
 				vao->add_vertex_buffer(*vbo);
 			}
 			// INDEX BUFFER
 			if (sizeof(indices) > 0) {
-				index_buffer = std::make_unique <IndexBuffer>(indices.data(), indices.size());
+				index_buffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());
 				vao->set_index_buffer(*index_buffer);
 			}
 			// Textures
@@ -207,98 +216,239 @@ namespace SimpleEngine {
 		Camera camera;
 	};
 
+	class LightCubeNew : public MeshNew {
+	public:
+		LightCubeNew(
+			std::vector<Vertex>&& vertices,
+			std::vector<unsigned int>&& indices,
+			std::map<std::string, Texture2D>&& textures) :
+			MeshNew(std::move(vertices), std::move(indices), std::move(textures)) {
+			SetupMesh();
+		}
+
+		// Explicitly delete the copy constructor and copy assignment operator
+		LightCubeNew(const LightCubeNew&) = delete;
+		LightCubeNew& operator=(const LightCubeNew&) = delete;
+
+		// Move constructor
+		LightCubeNew(LightCubeNew&& other) noexcept
+			: MeshNew(std::move(other)) {
+			// After moving, `other` should not be used except for destruction
+		}
+
+		// Move assignment operator
+		LightCubeNew& operator=(LightCubeNew&& other) noexcept {
+			if (this != &other) { // Avoid self-assignment
+				shader_program = std::move(other.shader_program);
+				vao = std::move(other.vao);
+				vbo = std::move(other.vbo);
+				index_buffer = std::move(other.index_buffer);
+				textures = std::move(other.textures);
+				vertices = std::move(other.vertices);
+				indices = std::move(other.indices);
+				camera = std::move(other.camera);
+			}
+			return *this;
+		}
+		void UpdateLight(const PointLight& light) {
+			this->light = light;
+		}
+		void Draw() {
+			shader_program->bind();
+
+			// draw light cube
+			{
+				glm::mat4 translate_mat(
+					1, 0, 0, 0,
+					0, 1, 0, 0,
+					0, 0, 1, 0,
+					light.position[0], light.position[1], light.position[2], 1);
+				glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), glm::vec3(3));
+				shader_program->set_matrix4("mvp_mat",
+					camera.get_projection_matrix() * camera.get_view_matrix() * translate_mat * scale_mat);
+
+				light.UseLight(
+					shader_program->get_uniform_location("light_ambient"),
+					shader_program->get_uniform_location("light_diffuse"),
+					shader_program->get_uniform_location("light_specular"),
+					shader_program->get_uniform_location("pointLight.position"),
+					shader_program->get_uniform_location("pointLight.ambientIntensity"),
+					shader_program->get_uniform_location("pointLight.diffuseIntensity"),
+					shader_program->get_uniform_location("pointLight.specularIntensity"),
+					shader_program->get_uniform_location("pointLight.constant"),
+					shader_program->get_uniform_location("pointLight.linear"),
+					shader_program->get_uniform_location("pointLight.quadratic"));
+				Renderer_OpenGL::draw(*vao);
+			}
+		}
+	private:
+		PointLight light;
+	};
+
+	// Factory registry type
+	using MeshFactory = std::function<std::unique_ptr<MeshNew>(
+		std::vector<Vertex>&&,
+		std::vector<unsigned int>&&,
+		std::map<std::string, Texture2D>&&)>;
+
+
+
+	std::unordered_map<std::string, MeshFactory> meshRegistry = {
+	{"LightCube", [](auto&& vertices, auto&& indices, auto&& textures) -> std::unique_ptr<MeshNew> {
+		return std::make_unique<LightCubeNew>(
+			std::move(vertices), std::move(indices), std::move(textures));
+	}},
+	{"MeshNew", [](auto&& vertices, auto&& indices, auto&& textures) -> std::unique_ptr<MeshNew> {
+		return std::make_unique<MeshNew>(
+			std::move(vertices), std::move(indices), std::move(textures));
+	}}
+		// Add more models here...
+	};
+
+
+	// Factory function
+	std::unique_ptr<MeshNew> CreateMesh(
+		std::vector<Vertex>&& vertices,
+		std::vector<unsigned int>&& indices,
+		std::map<std::string, Texture2D>&& textures,
+		const std::string& type)
+	{
+		auto it = meshRegistry.find(type);
+		if (it != meshRegistry.end()) {
+			return it->second(std::move(vertices), std::move(indices), std::move(textures));
+		}
+		throw std::runtime_error("Unknown mesh type: " + type);
+	}
+
 	class Model {
 	public:
-		Model(std::filesystem::path path = "") {
+		Model(MeshType meshType = MeshType::LightCube,
+			std::filesystem::path path = "",
+			std::filesystem::path vertex_shader_path = "",
+			std::filesystem::path frag_shader_path = "")
+			: meshType(meshType)
+		{
 			LoadModel(path.string());
+			for (const auto& mesh : meshes) {
+				mesh->SetupShaderProgram(vertex_shader_path, frag_shader_path);
+			}
 		}
-		std::vector<std::unique_ptr<MeshNew>> meshes;
-	private:
-		std::string directory;
 
-		void LoadModel(std::string path) {
+		void Draw() {
+			for (const auto& mesh : meshes) {
+				mesh->Draw();
+			}
+		}
+
+		void UpdateCamera(const Camera& cam) {
+			for (const auto& mesh : meshes) {
+				mesh->UpdateCamera(cam);
+			}
+		}
+
+		void UpdateLight(const PointLight& light) {
+			for (const auto& mesh : meshes) {
+				mesh->UpdateLight(light);
+			}
+		}
+
+	private:
+		void LoadModel(const std::string& path) {
 			Assimp::Importer import;
 			const aiScene* scene = import.ReadFile(path,
 				aiProcess_Triangulate | aiProcess_FlipUVs);
 
-			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
-				!scene->mRootNode)
-			{
+			if (!scene || (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !scene->mRootNode) {
 				LOG_INFO("ERROR::ASSIMP::{0}", import.GetErrorString());
 				return;
 			}
+
 			directory = path.substr(0, path.find_last_of('/'));
 			ProcessNode(scene->mRootNode, scene);
 		}
+
 		void ProcessNode(aiNode* node, const aiScene* scene) {
-			// process all the node’s meshes (if any)
-			for (unsigned int i = 0; i < node->mNumMeshes; i++)
-			{
+			// Process all the node’s meshes (if any)
+			for (unsigned int i = 0; i < node->mNumMeshes; i++) {
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-				meshes.emplace_back(std::make_unique<MeshNew>(ProcessMesh(mesh, scene)));
+				meshes.emplace_back(ProcessMesh(mesh, scene));
 			}
-			// then do the same for each of its children
-			for (unsigned int i = 0; i < node->mNumChildren; i++)
-			{
+
+			// Process each of the children
+			for (unsigned int i = 0; i < node->mNumChildren; i++) {
 				ProcessNode(node->mChildren[i], scene);
 			}
 		}
-		MeshNew ProcessMesh(aiMesh* mesh, const aiScene* scene) {
+
+		std::unique_ptr<MeshNew> ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 			std::vector<Vertex> vertices;
 			std::vector<unsigned int> indices;
 			std::map<std::string, Texture2D> textures;
-			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-			{
+
+			// Process vertex positions, normals, and texture coordinates
+			for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 				Vertex vertex;
-				// process vertex positions, normals and texture coordinates
-				// Vertices
+
+				// Positions
 				glm::vec3 vector;
 				vector.x = mesh->mVertices[i].x;
 				vector.y = mesh->mVertices[i].y;
 				vector.z = mesh->mVertices[i].z;
 				vertex.Position = vector;
+
 				// Normals
 				vector.x = mesh->mNormals[i].x;
 				vector.y = mesh->mNormals[i].y;
 				vector.z = mesh->mNormals[i].z;
 				vertex.Normal = vector;
-				// Textures
-				if (mesh->mTextureCoords[0])
-				{
+
+				// Texture Coordinates
+				if (mesh->mTextureCoords[0]) {
 					glm::vec2 vec;
 					vec.x = mesh->mTextureCoords[0][i].x;
 					vec.y = mesh->mTextureCoords[0][i].y;
 					vertex.TexCoords = vec;
 				}
-				else
+				else {
 					vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+				}
+
 				vertices.push_back(vertex);
 			}
-			// process indices
-			for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-			{
+
+			// Process indices
+			for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 				aiFace face = mesh->mFaces[i];
-				for (unsigned int j = 0; j < face.mNumIndices; j++)
-					indices.emplace_back(face.mIndices[j]);
+				for (unsigned int j = 0; j < face.mNumIndices; j++) {
+					indices.push_back(face.mIndices[j]);
+				}
 			}
-			// process material
-			/*if (mesh->mMaterialIndex >= 0)
-			{
+
+			// Process material textures
+			// Uncomment if texture loading is implemented
+			/*
+			if (mesh->mMaterialIndex >= 0) {
 				aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-				std::vector<Texture2D> diffuseMaps = LoadMaterialTextures(material,
-					aiTextureType_DIFFUSE, "texture_diffuse");
+				auto diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 				textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-				std::vector<Texture2D> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-				textures.insert(textures.end(), specularMaps.begin(),
-					specularMaps.end());
-			}*/
-			return MeshNew(std::move(vertices), std::move(indices), std::move(textures));
+				auto specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+				textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+			}
+			*/
+
+			// Determine the mesh type and create the mesh
+			std::string type = (meshType == MeshType::LightCube) ? "LightCube" : "MeshNew";
+			return CreateMesh(std::move(vertices), std::move(indices), std::move(textures), type);
 		}
+
 		std::vector<Texture2D> LoadMaterialTextures(aiMaterial* mat,
-			aiTextureType type, std::string typeName) {
+			aiTextureType type,
+			const std::string& typeName)
+		{
 			std::vector<Texture2D> textures;
-			/*for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
-			{
+			// Uncomment and implement if material textures are needed
+			/*
+			for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
 				aiString str;
 				mat->GetTexture(type, i, &str);
 				Texture2D texture;
@@ -306,10 +456,17 @@ namespace SimpleEngine {
 				texture.type = typeName;
 				texture.path = str;
 				textures.push_back(texture);
-			}*/
+			}
+			*/
 			return textures;
 		}
+
+	private:
+		std::string directory;
+		MeshType meshType;
+		std::vector<std::unique_ptr<MeshNew>> meshes;
 	};
+
 
 	class LightCube : public Mesh {
 	public:

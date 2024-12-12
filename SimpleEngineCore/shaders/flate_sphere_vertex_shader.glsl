@@ -7,7 +7,7 @@ out vec3 frag_pos;
 flat out vec3 frag_normal;
 
 uniform mat4 m_mat;
-uniform mat3 normal_mat; // todo derive it
+uniform mat3 normal_mat; 
 uniform mat4 mvp_mat;
 
 void main() {

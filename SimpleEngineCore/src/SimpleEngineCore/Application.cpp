@@ -73,7 +73,7 @@ namespace SimpleEngine {
 	std::unique_ptr<Cube> cube;
 	std::unique_ptr<LightCube> lightCube;
 	std::unique_ptr<Cube> groundCube;
-	Model model;
+	std::unique_ptr<Model> model;
 
 	std::unique_ptr<Cube> directionalLightCube;
 
@@ -246,8 +246,14 @@ namespace SimpleEngine {
 
 		// Model testing
 		{
-			std::filesystem::path shaderPath = getBasePath() / "models";
-			model = Model(shaderPath / "bin.obj");
+			std::filesystem::path shaderPath = getBasePath() / "shaders";
+			std::filesystem::path vertex_shader_path = shaderPath / "light_cube_vertex_shader.glsl";
+			std::filesystem::path frag_shader_path = shaderPath / "light_cube_fragment_shader.glsl";
+			std::filesystem::path modelPath = getBasePath() / "models/Cake";
+			model = std::make_unique<Model>(
+				MeshType::LightCube, modelPath / "cake.obj",
+				vertex_shader_path, frag_shader_path
+			);
 		}
 
 		Renderer_OpenGL::enable_depth_testing();
@@ -293,14 +299,14 @@ namespace SimpleEngine {
 		cube->UpdateCamera(camera);
 		cube->Draw();
 
-		directionalLightCube->UpdateDirVector(dirLight.direction);
+		/*directionalLightCube->UpdateDirVector(dirLight.direction);
 		directionalLightCube->UpdateCamera(camera);
 		directionalLightCube->Draw();
 
 		lightCube->UpdateLight(pointLight);
 		lightCube->UpdateCamera(camera);
 		lightCube->Draw();
-
+		*/
 
 		groundCube->UpdateLight(
 			dirLight, useDirectionalLight,
@@ -310,7 +316,9 @@ namespace SimpleEngine {
 		groundCube->UpdateCamera(camera);
 		groundCube->Draw();
 
-		//model->
+		model->UpdateLight(pointLight);
+		model->UpdateCamera(camera);
+		model->Draw();
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();
