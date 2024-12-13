@@ -249,9 +249,9 @@ namespace SimpleEngine {
 			std::filesystem::path shaderPath = getBasePath() / "shaders";
 			std::filesystem::path vertex_shader_path = shaderPath / "light_cube_vertex_shader.glsl";
 			std::filesystem::path frag_shader_path = shaderPath / "light_cube_fragment_shader.glsl";
-			std::filesystem::path modelPath = getBasePath() / "models/Cake";
+			std::filesystem::path modelPath = getBasePath() / "models/Cow2";
 			model = std::make_unique<Model>(
-				MeshType::LightCube, modelPath / "cake.obj",
+				MeshType::LightCube, modelPath / "cow.obj",
 				vertex_shader_path, frag_shader_path
 			);
 		}

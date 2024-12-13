@@ -258,6 +258,7 @@ namespace SimpleEngine {
 
 			// draw light cube
 			{
+				glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
 				glm::mat4 translate_mat(
 					1, 0, 0, 0,
 					0, 1, 0, 0,
@@ -265,7 +266,7 @@ namespace SimpleEngine {
 					light.position[0], light.position[1], light.position[2], 1);
 				glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), glm::vec3(3));
 				shader_program->set_matrix4("mvp_mat",
-					camera.get_projection_matrix() * camera.get_view_matrix() * translate_mat * scale_mat);
+					camera.get_projection_matrix() * camera.get_view_matrix() * rotateMat * translate_mat * scale_mat);
 
 				light.UseLight(
 					shader_program->get_uniform_location("light_ambient"),
