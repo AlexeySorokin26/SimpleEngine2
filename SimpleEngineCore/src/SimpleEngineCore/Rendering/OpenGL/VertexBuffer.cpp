@@ -74,10 +74,12 @@ namespace SimpleEngine {
 	VertexBuffer::VertexBuffer(const void* data, const size_t size, BufferLayout buffer_layout, const EUsage usage)
 		: m_buffer_layout(std::move(buffer_layout)) {
 		// NOW we have to PASS our CPU data in shaders 
-		// using VERTEX BUFFER OBJECT to allocate and fill memory on gpu
+		// Create a variable to store the buffer ID
+		// we don't allocate or feel memory on this step
 		glGenBuffers(1, &m_id);
 		// connect buffer and make it current (only one can be current)
 		bind();
+		// here we allocate memory on gpu and transfer it from cpu
 		// fill buffer by transfering data from cpu to gpu memory
 		// static means data in buffer do not change
 		glBufferData(GL_ARRAY_BUFFER, size, data, usage_to_GLenum(usage));

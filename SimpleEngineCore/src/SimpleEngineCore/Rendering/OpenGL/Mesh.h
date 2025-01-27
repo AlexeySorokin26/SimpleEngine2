@@ -34,7 +34,7 @@
 
 #include <unordered_map>
 #include <functional>
-
+#include <iostream>
 
 namespace SimpleEngine {
 
@@ -198,17 +198,17 @@ namespace SimpleEngine {
 				vao->set_index_buffer(*index_buffer);
 			}
 			// Textures
-			/*for (const auto& tp : v_texturePaths) {
-				const unsigned int w = 1000;
-				const unsigned int h = 1000;
-				m_texture.emplace(std::make_pair(tp.stem().string(), Texture2D(tp.string(), w, h)));
-			}*/
+			//for (const auto& tp : textures) {
+			//	const unsigned int w = 1000;
+			//	const unsigned int h = 1000;
+			//	m_texture.emplace(std::make_pair(tp.stem().string(), Texture2D(tp.string(), w, h)));
+			//}
 		}
 	protected:
-		std::unique_ptr <ShaderProgram> shader_program;
-		std::unique_ptr <VertexArray> vao;
-		std::unique_ptr <VertexBuffer> vbo;
-		std::unique_ptr <IndexBuffer> index_buffer;
+		std::unique_ptr<ShaderProgram> shader_program;
+		std::unique_ptr<VertexArray> vao;
+		std::unique_ptr<VertexBuffer> vbo;
+		std::unique_ptr<IndexBuffer> index_buffer;
 		std::map<std::string, Texture2D> textures;
 		// mesh data
 		std::vector<Vertex> vertices;
@@ -370,6 +370,7 @@ namespace SimpleEngine {
 
 		void ProcessNode(aiNode* node, const aiScene* scene) {
 			// Process all the node’s meshes (if any)
+			std::cout << "mNumMeshes:" << node->mNumMeshes << std::endl;
 			for (unsigned int i = 0; i < node->mNumMeshes; i++) {
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 				meshes.emplace_back(ProcessMesh(mesh, scene));
@@ -426,27 +427,37 @@ namespace SimpleEngine {
 			}
 
 			// Process material textures
-			// Uncomment if texture loading is implemented
-			/*
-			if (mesh->mMaterialIndex >= 0) {
+			/*if (mesh->mMaterialIndex >= 0) {
 				aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+
 				auto diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-				textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+				for (auto& texture : diffuseMaps) {
+					textures.emplace(std::move(texture.first), std::move(texture.second));
+				}
+
 				auto specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-				textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-			}
-			*/
+				for (auto& texture : specularMaps) {
+					textures.emplace(std::move(texture.first), std::move(texture.second));
+				}
+			}*/
+
 
 			// Determine the mesh type and create the mesh
 			std::string type = (meshType == MeshType::LightCube) ? "LightCube" : "MeshNew";
+			for (const auto v : vertices) {
+				std::cout << v.Normal.x << ", " << v.Normal.y << ", " << v.Normal.z << std::endl;
+				std::cout << v.Position.x << ", " << v.Position.y << ", " << v.Position.z << std::endl;
+				std::cout << v.TexCoords.x << ", " << v.TexCoords.y << std::endl;
+			}
+			for (const auto ind : indices) {
+				std::cout << ind << ", ";
+			}
 			return CreateMesh(std::move(vertices), std::move(indices), std::move(textures), type);
 		}
 
-		std::vector<Texture2D> LoadMaterialTextures(aiMaterial* mat,
-			aiTextureType type,
-			const std::string& typeName)
+		std::map<std::string, Texture2D> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName)
 		{
-			std::vector<Texture2D> textures;
+			std::map<std::string, Texture2D> textures;
 			// Uncomment and implement if material textures are needed
 			/*
 			for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
@@ -467,7 +478,6 @@ namespace SimpleEngine {
 		MeshType meshType;
 		std::vector<std::unique_ptr<MeshNew>> meshes;
 	};
-
 
 	class LightCube : public Mesh {
 	public:
@@ -681,4 +691,5 @@ namespace SimpleEngine {
 		Material material;
 		glm::vec3 position;
 	};
+
 }
